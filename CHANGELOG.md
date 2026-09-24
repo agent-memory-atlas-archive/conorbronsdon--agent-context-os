@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Fixed
+- Windows Python launched from WSL now works from both `/mnt/<drive>` and
+  Linux-filesystem checkouts: the encoding, bytecode, and root settings are
+  forwarded through `WSLENV`, kernel and hook paths are converted with
+  `wslpath -w`, failed conversions name the path, and platform detection reuses
+  the interpreter probe (#210).
 - Devin root controls now ask for the repository instruction canary without
   naming its file, and cleanup errors retain the original control failure.
   Cursor IDE explicit-skill results stay unverified when a direct file read
