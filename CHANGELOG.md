@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+- Hermes lifecycle invocation is documented as `/context-setup`,
+  `/context-start`, `/context-update`, and `/context-end`: Hermes Agent
+  v0.21.4 reserves `/start` and `/update` for built-ins (#163).
 - Windows Python launched from WSL now works from both `/mnt/<drive>` and
   Linux-filesystem checkouts: the encoding, bytecode, and root settings are
   forwarded through `WSLENV`, kernel and hook paths are converted with
@@ -35,6 +38,16 @@
   command sources and lifecycle artifacts remain covered.
 
 ### Added
+- An opt-in, operator-driven Hermes live conformance harness. It prepares a
+  disposable fixture with committed canaries and an external manifest, sends
+  bare `/context-*` commands, credits discovery only without self-reads across
+  read-like tools and raw tool results, checks read-only start (including
+  kernel state), exact-digest apply with receipts, wrong-digest and
+  stale-target rejection, and native-memory separation, and writes
+  create-only, redacted evidence with a filtered environment (#163).
+- Five recorded Hermes Agent v0.21.4 live attempts on free OpenRouter routes,
+  retained with their failures in `docs/evidence/hermes-live-2026-09-23/`.
+  None passed every control, so Hermes remains experimental (#163).
 - Opt-in, operator-assisted live conformance harnesses for the experimental
   Cursor IDE and Agent CLI surfaces and for Devin sessions and Review. They
   record create-only evidence outside the checkout and never run in CI or

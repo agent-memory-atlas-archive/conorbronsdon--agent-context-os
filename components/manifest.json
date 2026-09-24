@@ -729,6 +729,34 @@
                     "policy": "development"
                 },
                 {
+                    "path": "docs/evidence/hermes-live-2026-09-23/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-1.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-2.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-3.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-4.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-4-operator.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/hermes-live-2026-09-23/attempt-5.json",
+                    "policy": "development"
+                },
+                {
                     "path": "docs/continuity.md",
                     "policy": "managed"
                 },
@@ -1082,7 +1110,7 @@
         },
         {
             "id": "hermes-adapter",
-            "description": "Hermes installation guidance, optional hooks, and runtime descriptor.",
+            "description": "Hermes installation guidance, live conformance harness, optional hooks, and runtime descriptor.",
             "depends_on": [
                 "core",
                 "portable-skills",
@@ -1098,8 +1126,20 @@
                     "policy": "managed"
                 },
                 {
+                    "path": "adapters/hermes/live_conformance.py",
+                    "policy": "managed"
+                },
+                {
                     "path": "runtimes/hermes.json",
                     "policy": "managed"
+                },
+                {
+                    "path": "tests/test_hermes_conformance.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "tests/test_hermes_live_harness.py",
+                    "policy": "development"
                 }
             ]
         },
