@@ -29,11 +29,34 @@ root = pathlib.Path.cwd()
 if '--version' in sys.argv:
     print('Hermes Agent v0.20.5 (fake build)' if os.environ.get('FAKE_HERMES_MODE') == 'wrong-version' else 'Hermes Agent v0.21.4 (fake build)')
     sys.exit(0)
+mode = os.environ.get('FAKE_HERMES_MODE', '')
+if sys.argv[1:3] == ['skills', 'trust']:
+    if mode == 'trust-mutate-fixture':
+        (root / 'state' / 'current.md').write_text('changed during trust')
+    if mode == 'trust-mutate-sentinel':
+        (root / 'unrelated-sentinel.txt').write_text('changed during trust')
+    trust_path = 'different-fixture' if mode in ('trust-missing-path', 'trust-wrong-root', 'trust-wrong-output-root') else sys.argv[3]
+    print(('Recognized: ' if mode == 'trust-missing-output' else 'Trusted: ') + trust_path)
+    print('10 project skill(s) will load from ' + (sys.argv[3] if mode in ('trust-wrong-root', 'trust-wrong-output-root') else trust_path))
+    if mode == 'trust-wrong-output-root':
+        trust_path = sys.argv[3]
+    if mode == 'trust-under-other-parent':
+        (pathlib.Path(os.environ['HERMES_HOME']) / 'config.yaml').write_text(
+            'skills:\n  trusted_project_dirs:\n    - different-fixture\nother:\n  trusted_project_dirs:\n    - ' + trust_path + '\n')
+    elif mode == 'trust-path-under-other-key':
+        (pathlib.Path(os.environ['HERMES_HOME']) / 'config.yaml').write_text(
+            'skills:\n  trusted_project_dirs:\n    - different-fixture\nrecent_paths:\n  - ' + trust_path + '\n')
+    elif mode != 'trust-no-config':
+        (pathlib.Path(os.environ['HERMES_HOME']) / 'config.yaml').write_text(
+            'skills:\n  trusted_project_dirs:\n    - ' + trust_path + '\n_config_version: 46\n')
+    sys.exit(2 if mode == 'trust-nonzero' else 0)
 prompt = sys.argv[sys.argv.index('-q') + 1]
 manifest = json.loads(pathlib.Path(os.environ['HERMES_LIVE_MANIFEST']).read_text())
 canaries = manifest['canaries']
-phase = next(name for name in ('setup', 'start', 'update', 'end') if prompt.startswith('/context-' + name))
-mode = os.environ.get('FAKE_HERMES_MODE', '')
+skill_name = sys.argv[sys.argv.index('-s') + 1]
+phase = next(name for name in ('setup', 'start', 'update', 'end') if skill_name == 'context-' + name)
+if prompt.startswith('/'):
+    sys.exit(4)
 if sys.argv[sys.argv.index('--format') + 1] != 'stream-json':
     sys.exit(3)
 def emit(event):
@@ -41,7 +64,7 @@ def emit(event):
 if mode == 'skill-view-idless-pair':
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': phase}})
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': 'context-' + phase}})
-else:
+elif mode != 'preloaded-no-skill-view':
     emit({'type': 'tool_use', 'id': 'skill-1', 'name': 'skill_view', 'input': {'name': 'context-' + phase}})
 if mode == 'skill-view-id-consumed':
     emit({'type': 'tool_result', 'id': 'skill-1', 'name': 'read_file', 'output': 'ordinary fixture data'})
@@ -53,11 +76,29 @@ if mode in ('skill-view-other-phase', 'parallel-skill-view-other-phase'):
     skill += (root / '.agents' / 'skills' / 'context-start' / 'SKILL.md').read_text()
 if mode in ('skill-view-native-memory', 'parallel-skill-view-native-memory'):
     skill += (pathlib.Path(os.environ['HERMES_HOME']) / 'memories' / 'USER.md').read_text()
+if mode in ('read-before-skill-view', 'search-canary-before-skill-view'):
+    tool = 'read_file' if mode == 'read-before-skill-view' else 'search_files'
+    detail = ({'path': '.agents/skills/context-' + phase + '/SKILL.md'} if tool == 'read_file'
+              else {'pattern': canaries['context-' + phase]})
+    emit({'type': 'tool_use', 'id': 'read-1', 'name': tool, 'input': detail})
+    emit({'type': 'tool_result', 'id': 'read-1', 'name': tool, 'output': skill})
 if mode == 'skill-view-idless-pair':
     emit({'type': 'tool_result', 'name': 'skill_view', 'output': skill})
     emit({'type': 'tool_result', 'name': 'skill_view', 'output': skill})
-else:
+elif mode != 'preloaded-no-skill-view':
     emit({'type': 'tool_result', 'id': 'skill-1', 'name': 'skill_view', 'output': skill})
+if mode in ('read-after-skill-view', 'search-after-skill-view', 'read-other-phase-after-skill-view',
+            'read-native-memory-after-skill-view'):
+    target = ('.agents/skills/context-start/SKILL.md' if mode == 'read-other-phase-after-skill-view'
+              else str(pathlib.Path(os.environ['HERMES_HOME']) / 'memories' / 'USER.md')
+              if mode == 'read-native-memory-after-skill-view'
+              else '.agents/skills/context-' + phase + '/SKILL.md')
+    tool = 'search_files' if mode == 'search-after-skill-view' else 'read_file'
+    detail = {'pattern': canaries['context-' + phase]} if tool == 'search_files' else {'path': target}
+    emit({'type': 'tool_use', 'id': 'read-2', 'name': tool, 'input': detail})
+    emit({'type': 'tool_result', 'id': 'read-2', 'name': tool,
+          'output': pathlib.Path(target).read_text() if pathlib.Path(target).is_absolute()
+          else (root / target).read_text()})
 if mode == 'skill-view-replayed-result':
     emit({'type': 'tool_result', 'id': 'skill-1', 'name': 'skill_view', 'output': skill})
 if mode == 'write-agents-word':
@@ -323,13 +364,43 @@ class HermesLiveHarnessTest(unittest.TestCase):
         self.assertEqual("failed", report["controls"]["run"])
         self.assertIn("canary not reported", report["failure"])
 
-    def test_prompts_are_bare_commands_without_file_names(self) -> None:
+    def test_trust_is_recorded_before_chat(self) -> None:
+        report = self.run_record()
+        self.assertEqual("passed", report["controls"]["project_skill_trust"], report.get("failure"))
+        self.assertEqual("skills", report["commands"][1]["argv"][2])
+        self.assertEqual("trust", report["commands"][1]["argv"][3])
+        for phase, call in zip(live.PHASES, (item for item in report["commands"] if "chat" in item["argv"])):
+            argv = call["argv"]
+            self.assertEqual(f"context-{phase}", argv[argv.index("-s") + 1])
+            self.assertFalse(argv[argv.index("-q") + 1].startswith("/"))
+
+    def test_trust_failures_stop_before_chat(self) -> None:
+        for mode in ("trust-nonzero", "trust-missing-output", "trust-missing-path", "trust-wrong-root", "trust-wrong-output-root", "trust-no-config", "trust-path-under-other-key", "trust-under-other-parent",
+                     "trust-mutate-fixture", "trust-mutate-sentinel"):
+            with self.subTest(mode=mode):
+                self.evidence.unlink(missing_ok=True)
+                (self.home / "config.yaml").unlink(missing_ok=True)
+                report = self.run_record(mode)
+                self.assertEqual("failed", report["controls"]["project_skill_trust"])
+                self.assertIn("project skill trust failed", report["failure"])
+                self.assertEqual(2, len(report["commands"]))
+
+    def test_prompts_are_plain_text_without_file_names(self) -> None:
         for phase in live.PHASES:
             prompt = live.prompt_for(phase)
-            self.assertTrue(prompt.startswith(f"/context-{phase}"))
+            self.assertTrue(prompt)
+            self.assertFalse(prompt.startswith("/"))
             self.assertNotIn("AGENTS.md", prompt)
             self.assertNotIn("SKILL.md", prompt)
             self.assertNotIn(".agents/skills", prompt)
+
+    def test_phase_prompts_do_not_disclose_canary_marker_or_values(self) -> None:
+        canaries = json.loads(self.manifest_path.read_text(encoding="utf-8"))["canaries"]
+        for phase in live.PHASES:
+            prompt = live.prompt_for(phase)
+            self.assertNotIn("Hermes fixture canary:", prompt)
+            for value in canaries.values():
+                self.assertNotIn(value, prompt)
 
     def test_self_read_blocks_discovery(self) -> None:
         for mode in ("self-read-agents", "self-read-skill", "self-read-terminal", "self-read-search",
@@ -343,13 +414,49 @@ class HermesLiveHarnessTest(unittest.TestCase):
                 report = self.run_record(mode)
                 self.assertEqual("failed", report["controls"]["setup_discovery"])
                 self.assertEqual("HarnessError: self-read: discovery not shown", report["failure"])
-                self.assertEqual(["context-setup"], report["commands"][1]["skill_view_names"])
+                self.assertEqual(["context-setup"], report["commands"][2]["skill_view_names"])
                 if mode == "result-leak":
                     self.assertIn("[REDACTED TOOL RESULT]", self.evidence.read_text(encoding="utf-8"))
 
     def test_skill_view_result_is_not_self_read(self) -> None:
         report = self.run_record("skill-view-valid")
         self.assertEqual("passed", report["controls"]["run"], report.get("failure"))
+
+    def test_preloaded_skill_passes_without_skill_view(self) -> None:
+        report = self.run_record("preloaded-no-skill-view")
+        self.assertEqual("passed", report["controls"]["run"], report.get("failure"))
+        for call in (item for item in report["commands"] if "chat" in item["argv"]):
+            self.assertEqual([], call["skill_view_names"])
+
+    def test_read_after_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("read-after-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
+
+    def test_read_before_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("read-before-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
+
+    def test_search_after_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("search-after-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
+
+    def test_other_phase_read_after_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("read-other-phase-after-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
+
+    def test_native_memory_read_after_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("read-native-memory-after-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
+
+    def test_search_canary_before_skill_view_fails_discovery(self) -> None:
+        report = self.run_record("search-canary-before-skill-view")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("self-read", report["failure"])
 
     def test_parallel_skill_view_result_passes_discovery(self) -> None:
         report = self.run_record("parallel-skill-view-valid")
@@ -394,12 +501,41 @@ class HermesLiveHarnessTest(unittest.TestCase):
         result["id"] = "skill-2"
         self.assertTrue(live.stream_evidence("\n".join(json.dumps(event) for event in (use, result)), canaries, "setup")[3])
 
+    def test_transformed_phase_canary_after_skill_view_is_self_read(self) -> None:
+        marker = "abcdef0123456789abcdef0123456789"
+        events = [
+            {"type": "tool_use", "id": "skill-1", "name": "skill_view", "input": {"name": "context-setup"}},
+            {"type": "tool_result", "id": "skill-1", "name": "skill_view", "output": marker},
+            {"type": "tool_use", "id": "read-1", "name": "read_file",
+             "input": {"path": ".agents/skills/context-setup/SKILL.md"}},
+            {"type": "tool_result", "id": "read-1", "name": "read_file", "output": marker.upper()},
+        ]
+        raw = "\n".join(json.dumps(event) for event in events)
+        self.assertTrue(live.stream_evidence(raw, {"context-setup": marker}, "setup")[3])
+
+    def test_post_discovery_read_cannot_surface_agents_or_target_external_files(self) -> None:
+        own, agents = "phase-canary", "agents-canary"
+        skill = [
+            {"type": "tool_use", "id": "skill-1", "name": "skill_view", "input": {"name": "context-setup"}},
+            {"type": "tool_result", "id": "skill-1", "name": "skill_view", "output": own},
+        ]
+        for target, output in ((".agents/skills/context-setup/SKILL.md", agents),
+                               ("../fixture-manifest.json", own),
+                               ("../evidence.json", own)):
+            with self.subTest(target=target, output=output):
+                events = skill + [
+                    {"type": "tool_use", "id": "read-1", "name": "read_file", "input": {"path": target}},
+                    {"type": "tool_result", "id": "read-1", "name": "read_file", "output": output},
+                ]
+                raw = "\n".join(json.dumps(event) for event in events)
+                self.assertTrue(live.stream_evidence(raw, {"agents": agents, "context-setup": own}, "setup")[3])
+
     def test_fake_skill_view_returns_fixture_skill_text(self) -> None:
         env = os.environ.copy()
         env["HERMES_LIVE_MANIFEST"] = str(self.manifest_path)
         env["HERMES_HOME"] = str(self.home)
         result = subprocess.run([sys.executable, str(self.fake), "chat", "--format", "stream-json",
-                                 "-q", live.prompt_for("setup")], cwd=self.fixture, env=env,
+                                 "-s", "context-setup", "-q", live.prompt_for("setup")], cwd=self.fixture, env=env,
                                 capture_output=True, text=True, check=False)
         self.assertEqual(0, result.returncode, result.stderr)
         events = [json.loads(line) for line in result.stdout.splitlines()]
@@ -997,9 +1133,9 @@ class HermesLiveHarnessTest(unittest.TestCase):
         self.assertEqual(manifest["fixture_commit"], report["fixture_commit"])
         self.assertEqual("interactive", report["operator_mode"])
         self.assertEqual("bypassed", report["controls"]["provider_key_preflight"])
-        self.assertIn("skill_view", [event.get("name") for event in report["commands"][1]["events"]])
-        self.assertEqual(["context-setup"], report["commands"][1]["skill_view_names"])
-        self.assertTrue(report["commands"][1]["argv"][-1].startswith("/context-setup"))
+        self.assertIn("skill_view", [event.get("name") for event in report["commands"][2]["events"]])
+        self.assertEqual(["context-setup"], report["commands"][2]["skill_view_names"])
+        self.assertFalse(report["commands"][2]["argv"][-1].startswith("/"))
         self.assertEqual("passed", report["controls"]["wrong_digest_rejected"])
         self.assertEqual("passed", report["controls"]["stale_target_rejected"])
         self.assertEqual("passed", report["controls"]["update_proposal_apply"])

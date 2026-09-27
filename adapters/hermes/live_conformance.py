@@ -100,6 +100,7 @@ def command(argv: Sequence[str], cwd: Path, env: dict[str, str] | None = None,
             "stdout": clean(stdout), "stderr": clean(stderr), "at": now()}
     if raw_output:
         result["_raw_stdout"] = stdout
+        result["_raw_stderr"] = stderr
     return result
 
 
@@ -128,12 +129,12 @@ def outside_checkouts(path: Path, source: Path) -> None:
 
 def prompt_for(phase: str) -> str:
     if phase == "setup":
-        prompt = "/context-setup Create a kernel proposal for a synthetic fixture identity. Stop after creating the proposal."
+        prompt = "Create a kernel proposal for a synthetic fixture identity. Stop after creating the proposal."
     if phase == "start":
-        prompt = "/context-start"
+        prompt = "Start the context lifecycle."
     if phase in ("update", "end"):
-        prompt = f"/context-{phase} Hermes fixture {phase} checkpoint. Stop after creating the kernel proposal."
-    return prompt + " Also report any line that begins 'Hermes fixture canary:' from the repository instructions and the skill instructions you loaded."
+        prompt = f"Hermes fixture {phase} checkpoint. Stop after creating the kernel proposal."
+    return prompt + " Also report the fixture canary values stated in the repository instructions and the skill instructions you loaded."
 
 
 def stream_evidence(output: str, known: Sequence[str] | dict[str, str],
@@ -466,11 +467,10 @@ def prepare(source: Path, fixture: Path, home: Path, expected_commit: str,
                 "native_memory_canaries": memory_canaries,
                 "sentinel_sha256": sha(fixture / "unrelated-sentinel.txt"),
                 "prompts": {phase: prompt_for(phase) for phase in PHASES},
-                "commands": ["hermes skills trust <fixture>", "hermes skills list --source local",
-                             "python adapters/hermes/live_conformance.py record --fixture <fixture> --home <home> --manifest <manifest> --evidence <new-json> --binary <hermes> --model <model> --provider <provider> --expected-version 'Hermes Agent v0.21.4' --run-budget 120 --max-turns 20"],
+                "commands": ["python adapters/hermes/live_conformance.py record --fixture <fixture> --home <home> --manifest <manifest> --evidence <new-json> --binary <hermes> --model <model> --provider <provider> --expected-version 'Hermes Agent v0.21.4' --run-budget 120 --max-turns 20"],
                 "steps": ["Set HERMES_HOME to the fresh home path printed by prepare.",
                           "Supply provider credentials through environment variables; do not copy credentials into the fixture.",
-                          "Run hermes skills trust <fixture> yourself, then verify hermes skills list --source local.",
+                          "Record trusts the fixture in the disposable HERMES_HOME before the first phase.",
                           "Run record with --binary, --model, --provider, --run-budget, --max-turns and --evidence.",
                           "For each proposal, inspect the printed diff and type its exact digest."]}
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -638,7 +638,7 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
               "operator_mode": "approval-dir" if approval_dir is not None else "interactive",
               "model": route_id(model, "model"), "provider": route_id(provider, "provider"),
               "controls": {name: "unsupported" for name in (
-                  "provider_key_preflight", "version", "agents_discovery", "setup_discovery", "setup_proposal_apply",
+                  "provider_key_preflight", "version", "project_skill_trust", "agents_discovery", "setup_discovery", "setup_proposal_apply",
                   "start_discovery", "start_read_only", "update_discovery", "update_proposal_apply",
                   "end_discovery", "end_proposal_apply", "wrong_digest_rejected", "stale_target_rejected",
                   "memory_separation", "unrelated_sentinel", "hook_example")},
@@ -668,6 +668,34 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
                 or (expected_version and not result["version"].startswith(expected_version))):
             raise HarnessError("Hermes version was not verified")
         result["controls"]["version"] = "passed"
+        current_control = "project_skill_trust"
+        before_trust = tracked_state(fixture)
+        trust = command([*binary, "skills", "trust", str(fixture)], fixture, env, raw_output=True)
+        trust_output = trust.pop("_raw_stdout") + "\n" + trust.pop("_raw_stderr")
+        result["commands"].append(trust)
+        config_path = home / "config.yaml"
+        trusted_entries = []
+        if config_path.is_file():
+            # Hermes writes trusted roots as "- <path>" items directly under skills.trusted_project_dirs.
+            key_indent = None
+            top_level = None
+            for line in config_path.read_text(encoding="utf-8", errors="replace").splitlines():
+                indent = len(line) - len(line.lstrip())
+                if line.strip() and indent == 0:
+                    top_level = line.strip()
+                if line.strip() == "trusted_project_dirs:" and top_level == "skills:" and indent > 0:
+                    key_indent = indent
+                elif key_indent is not None and line.strip():
+                    if indent <= key_indent:
+                        key_indent = None
+                    elif line.strip().startswith("- "):
+                        trusted_entries.append(line.strip()[2:].strip())
+        if (trust["exit_code"]
+                or not any(line.strip() == f"Trusted: {fixture}" for line in trust_output.splitlines())
+                or str(fixture) not in trusted_entries
+                or tracked_state(fixture) != before_trust):
+            raise HarnessError("project skill trust failed or changed the fixture")
+        result["controls"][current_control] = "passed"
         canaries = manifest["canaries"]
         stream_canaries = {**canaries, **{f"native-{name}": marker
                                          for name, marker in manifest["native_memory_canaries"].items()}}
@@ -677,9 +705,10 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
             proposals = set((fixture / ".context-os" / "proposals").glob("*.json"))
             prompt = prompt_for(phase)
             argv = [*binary, "chat", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
-                    "--run-budget", str(run_budget), "--max-turns", str(max_turns), "-q", prompt]
+                    "--run-budget", str(run_budget), "--max-turns", str(max_turns), "-s", f"context-{phase}", "-q", prompt]
             call = command(argv, fixture, env, timeout=run_budget + 30, raw_output=True)
             raw = call.pop("_raw_stdout")
+            call.pop("_raw_stderr")
             call["stdout"] = "[stream-json events recorded separately]"
             result["commands"].append(call)
             current_control = "memory_separation"
