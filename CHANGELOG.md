@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Fixed
+- The long continuity `handoff-sentences` fixture keeps interrupted status and
+  its qualifiers in one sentence, with full-answer citation quotes (#218).
+- A 15-trial same-day rerun (`docs/evidence/continuity-rerun-218-2026-09-26/`)
+  observed 0/150 citation rejections for the rule-following note, against 12/150
+  for the original compact note and 2/150 for Context OS (#218).
 - The Hermes live harness treats fixture canaries that reach tool results in
   transformed form (case, separators or `0x`, reversed, percent or `\u`
   escapes, base64/base64url including wrapped output, and gzip members) as
