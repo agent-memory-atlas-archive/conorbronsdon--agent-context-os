@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 ### Fixed
+- The Cursor CLI deny-precedence control recognizes the client's observed
+  `editToolCall` / `writePermissionDenied` stream. Cursor CLI
+  `2026.09.26-dd393fe` then passed all live CLI controls
+  (`docs/evidence/cursor-cli-2026-09-26/`). An IDE `3.21.18` operator run is
+  recorded as a diagnostic (`docs/evidence/cursor-ide-2026-09-26/`): Agent mode
+  wrote files before any approval, so the IDE surface is still
+  unverified (#73).
 - Hermes live conformance checks provider keys before model calls and records a
   separate setup control. Parallel `skill_view` requests now retain their
   matching result across other tool events; the adapter documents the

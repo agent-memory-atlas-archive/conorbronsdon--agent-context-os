@@ -21,6 +21,19 @@ sys.modules[SPEC.name] = live
 SPEC.loader.exec_module(live)
 
 
+DENY_STREAM = ROOT / "tests/fixtures/cursor/deny-stream-2026.09.23-86fc751.jsonl"
+
+
+def observed_deny_stream(path: str) -> list[dict]:
+    """Return the recorded Cursor CLI deny stream with its write aimed at path."""
+    events = [json.loads(line) for line in DENY_STREAM.read_text(encoding="utf-8").splitlines()]
+    for event in events:
+        edit = event.get("tool_call", {}).get("editToolCall", {})
+        if event.get("subtype") == "started" and "args" in edit:
+            edit["args"]["path"] = path
+    return events
+
+
 class CursorLiveHarnessTest(unittest.TestCase):
     def setUp(self) -> None:
         environment = mock.patch.dict(os.environ, {"CURSOR_CONFIG_DIR": "", "XDG_CONFIG_HOME": ""})
@@ -275,11 +288,219 @@ class CursorLiveHarnessTest(unittest.TestCase):
                 live.CommandResult([], 0, terminal, ""), self.root, "denied.txt", "deny"
             )
 
+    def test_deny_precedence_accepts_the_observed_cursor_denial_stream(self) -> None:
+        stream = "\n".join(json.dumps(item) for item in observed_deny_stream(str(self.root / "denied.txt")))
+        live.require_denied_write_attempt(
+            live.CommandResult([], 0, stream, ""), self.root, "denied.txt", "deny"
+        )
+
+    def assert_deny_stream_rejected(self, events: list[dict], message: str) -> None:
+        stream = "\n".join(json.dumps(item) for item in events)
+        with self.assertRaisesRegex(live.HarnessError, message):
+            live.require_denied_write_attempt(
+                live.CommandResult([], 0, stream, ""), self.root, "denied.txt", "deny"
+            )
+
+    def test_deny_precedence_validates_the_denial_payload(self) -> None:
+        def denial(events: list[dict]) -> dict:
+            completed = next(e for e in events if e.get("subtype") == "completed" and "editToolCall" in e["tool_call"])
+            return completed["tool_call"]["editToolCall"]["result"]
+
+        for name, change in {
+            "null payload": lambda result: result.update({"writePermissionDenied": None}),
+            "other reported path": lambda result: result["writePermissionDenied"].update({"path": "other.txt"}),
+            "non-string reported path": lambda result: result["writePermissionDenied"].update({"path": None}),
+            "error names another file": lambda result: result["writePermissionDenied"].update(
+                {"error": "Write permission denied: other.txt: Blocked by permissions configuration"}
+            ),
+        }.items():
+            with self.subTest(name=name):
+                events = observed_deny_stream(str(self.root / "denied.txt"))
+                change(denial(events))
+                self.assert_deny_stream_rejected(events, "other than policy")
+
+    def test_deny_precedence_checks_the_whole_stream(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        result_index = next(i for i, e in enumerate(events) if e.get("type") == "result")
+        later = [
+            {"type": "tool_call", "subtype": "started", "call_id": "call-2", "tool_call": {"editToolCall": {"args": {"path": str(self.root / "denied.txt")}}}},
+            {"type": "tool_call", "subtype": "completed", "call_id": "call-2", "tool_call": {"editToolCall": {"result": {"success": {}}}}},
+        ]
+        self.assert_deny_stream_rejected(events[:result_index] + later + events[result_index:], "other than policy")
+        outside = [
+            {"type": "tool_call", "subtype": "started", "call_id": "call-3", "tool_call": {"editToolCall": {"args": {"path": str(self.root.parent / "elsewhere.txt")}}}},
+        ]
+        self.assert_deny_stream_rejected(events[:result_index] + outside + events[result_index:], "outside")
+        ambiguous = [
+            {"type": "tool_call", "subtype": "started", "call_id": "call-4", "tool_call": {
+                "editToolCall": {"args": {"path": "denied.txt"}}, "writeToolCall": {"args": {"path": "denied.txt"}}}},
+        ]
+        self.assert_deny_stream_rejected(events[:result_index] + ambiguous + events[result_index:], "ambiguous")
+
+    def test_deny_precedence_matches_full_paths_and_every_completion(self) -> None:
+        subdirectory = observed_deny_stream(str(self.root / "sub" / "denied.txt"))
+        self.assert_deny_stream_rejected(subdirectory, "rejected denied write")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        completed = next(e for e in events if e.get("subtype") == "completed" and "editToolCall" in e["tool_call"])
+        completed["tool_call"]["editToolCall"]["result"]["writePermissionDenied"]["path"] = str(self.root / "sub" / "denied.txt")
+        self.assert_deny_stream_rejected(events, "other than policy")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        result_index = next(i for i, e in enumerate(events) if e.get("type") == "result")
+        other_success = [
+            {"type": "tool_call", "subtype": "started", "call_id": "call-5", "tool_call": {"editToolCall": {"args": {"path": str(self.root / "other.txt")}}}},
+            {"type": "tool_call", "subtype": "completed", "call_id": "call-5", "tool_call": {"editToolCall": {"result": {"success": {}}}}},
+        ]
+        self.assert_deny_stream_rejected(events[:result_index] + other_success + events[result_index:], "other than policy")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        for event in events:
+            if event.get("subtype") == "completed" and "editToolCall" in event["tool_call"]:
+                event["tool_call"] = {"writeToolCall": event["tool_call"].pop("editToolCall")}
+        self.assert_deny_stream_rejected(events, "ambiguous")
+
+    def test_write_completion_kind_switch_is_ambiguous(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        for event in events:
+            tool_call = event.get("tool_call")
+            if (
+                event.get("subtype") == "completed"
+                and isinstance(tool_call, dict)
+                and "editToolCall" in tool_call
+            ):
+                del tool_call["editToolCall"]
+                tool_call["shellToolCall"] = {"result": {"success": {"stdout": "DENIED_CONTROL"}}}
+                break
+        self.assert_deny_stream_rejected(events, "ambiguous write event")
+
+    def test_other_write_completed_as_non_write_is_ambiguous(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        started = next(
+            event for event in events
+            if event.get("subtype") == "started"
+            and "editToolCall" in (event.get("tool_call") or {})
+        )
+        completed = next(
+            event for event in events
+            if event.get("subtype") == "completed"
+            and "editToolCall" in (event.get("tool_call") or {})
+        )
+        switched_id = "tool_switched_write"
+        switched_start = json.loads(json.dumps(started))
+        switched_start["call_id"] = switched_id
+        switched_start["tool_call"]["editToolCall"]["args"]["path"] = str(self.root / "other.txt")
+        switched_done = json.loads(json.dumps(completed))
+        switched_done["call_id"] = switched_id
+        del switched_done["tool_call"]["editToolCall"]
+        switched_done["tool_call"]["shellToolCall"] = {"result": {"success": {"stdout": "DENIED_CONTROL"}}}
+        index = events.index(completed) + 1
+        events[index:index] = [switched_start, switched_done]
+        self.assert_deny_stream_rejected(events, "ambiguous write event")
+
+    def test_started_write_without_completion_is_rejected(self) -> None:
+        events = [
+            event for event in observed_deny_stream(str(self.root / "denied.txt"))
+            if not (
+                event.get("subtype") == "completed"
+                and "editToolCall" in (event.get("tool_call") or {})
+            )
+        ]
+        self.assert_deny_stream_rejected(events, "left a write attempt without a denial")
+
+    def test_unfinished_extra_write_is_rejected(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        started = next(
+            event for event in events
+            if event.get("subtype") == "started"
+            and "editToolCall" in (event.get("tool_call") or {})
+        )
+        unfinished = json.loads(json.dumps(started))
+        unfinished["call_id"] = "tool_unfinished"
+        unfinished["tool_call"]["editToolCall"]["args"]["path"] = str(self.root / "other.txt")
+        events.insert(events.index(started), unfinished)
+        self.assert_deny_stream_rejected(events, "left a write attempt without a denial")
+
+    def test_reused_write_call_id_is_ambiguous(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        started = next(
+            event for event in events
+            if event.get("subtype") == "started"
+            and "editToolCall" in (event.get("tool_call") or {})
+        )
+        forgotten = json.loads(json.dumps(started))
+        forgotten["tool_call"]["editToolCall"]["args"]["path"] = str(self.root / "other.txt")
+        events.insert(events.index(started), forgotten)
+        self.assert_deny_stream_rejected(events, "ambiguous write event")
+
+    def test_duplicate_write_completion_is_ambiguous(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        completed = next(
+            event for event in events
+            if event.get("subtype") == "completed"
+            and "editToolCall" in (event.get("tool_call") or {})
+        )
+        events.insert(events.index(completed) + 1, json.loads(json.dumps(completed)))
+        self.assert_deny_stream_rejected(events, "ambiguous write event")
+
+    def test_deny_precedence_requires_every_shell_call_to_be_denied(self) -> None:
+        def shell_events(events: list[dict], subtype: str) -> list[dict]:
+            return [e for e in events if e.get("subtype") == subtype and "shellToolCall" in e.get("tool_call", {})]
+
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        self.assertEqual(1, len(shell_events(events, "completed")))
+        shell_events(events, "completed")[0]["tool_call"]["shellToolCall"]["result"] = {"success": {"exitCode": 0}}
+        self.assert_deny_stream_rejected(events, "ran a shell command despite the project deny")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        events.remove(shell_events(events, "completed")[0])
+        self.assert_deny_stream_rejected(events, "left a shell command without a denial")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        duplicate = json.loads(json.dumps(shell_events(events, "started")[0]))
+        events.insert(events.index(shell_events(events, "started")[0]), duplicate)
+        self.assert_deny_stream_rejected(events, "ambiguous shell event")
+
+    def test_deny_precedence_rejects_events_naming_several_tools(self) -> None:
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        completed = next(e for e in events if e.get("subtype") == "completed" and "editToolCall" in e["tool_call"])
+        completed["tool_call"]["shellToolCall"] = {"result": {"success": {"exitCode": 0}}}
+        self.assert_deny_stream_rejected(events, "ambiguous write event")
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        started = next(e for e in events if e.get("subtype") == "started" and "editToolCall" in e["tool_call"])
+        started["tool_call"]["shellToolCall"] = {"args": {"command": "echo"}}
+        self.assert_deny_stream_rejected(events, "ambiguous")
+
+    def test_deny_precedence_rejects_other_completions_and_unmatched_calls(self) -> None:
+        cases = {
+            "success": {"success": {"path": "denied.txt"}},
+            "denial plus success": {"writePermissionDenied": {}, "success": {}},
+            "legacy invented key": {"denied": {"reason": "policy"}},
+        }
+        for name, outcome in cases.items():
+            with self.subTest(name=name):
+                events = observed_deny_stream(str(self.root / "denied.txt"))
+                completed = next(e for e in events if e.get("subtype") == "completed" and "editToolCall" in e.get("tool_call", {}))
+                completed["tool_call"]["editToolCall"]["result"] = outcome
+                stream = "\n".join(json.dumps(item) for item in events)
+                with self.assertRaisesRegex(live.HarnessError, "other than policy"):
+                    live.require_denied_write_attempt(
+                        live.CommandResult([], 0, stream, ""), self.root, "denied.txt", "deny"
+                    )
+        events = observed_deny_stream(str(self.root / "denied.txt"))
+        for event in events:
+            if event.get("subtype") == "completed" and "editToolCall" in event.get("tool_call", {}):
+                event["call_id"] = "unmatched"
+        stream = "\n".join(json.dumps(item) for item in events)
+        with self.assertRaisesRegex(live.HarnessError, "ambiguous"):
+            live.require_denied_write_attempt(
+                live.CommandResult([], 0, stream, ""), self.root, "denied.txt", "deny"
+            )
+        events = observed_deny_stream(str(self.root / "other.txt"))
+        stream = "\n".join(json.dumps(item) for item in events)
+        with self.assertRaisesRegex(live.HarnessError, "other than policy"):
+            live.require_denied_write_attempt(
+                live.CommandResult([], 0, stream, ""), self.root, "denied.txt", "deny"
+            )
+
     def test_deny_precedence_rejects_an_outside_workspace_attempt(self) -> None:
         stream = "\n".join(json.dumps(item) for item in [
-            {"type": "tool_call", "subtype": "started", "call_id": "call-1", "tool_call": {"writeToolCall": {"args": {"path": str(self.root.parent / "denied.txt")}}}},
-            {"type": "tool_call", "subtype": "completed", "call_id": "call-1", "tool_call": {"writeToolCall": {"args": {"path": str(self.root.parent / "denied.txt")}, "result": {"denied": {"reason": "policy"}}}}},
-            {"type": "result", "subtype": "success", "is_error": False, "result": "Denied"},
+            *observed_deny_stream(str(self.root.parent / "denied.txt")),
         ])
         with self.assertRaisesRegex(live.HarnessError, "outside"):
             live.require_denied_write_attempt(
@@ -288,8 +509,8 @@ class CursorLiveHarnessTest(unittest.TestCase):
 
     def test_deny_precedence_rejects_non_policy_tool_errors(self) -> None:
         stream = "\n".join(json.dumps(item) for item in [
-            {"type": "tool_call", "subtype": "started", "call_id": "call-1", "tool_call": {"writeToolCall": {"args": {"path": "denied.txt"}}}},
-            {"type": "tool_call", "subtype": "completed", "call_id": "call-1", "tool_call": {"writeToolCall": {"args": {"path": "denied.txt"}, "result": {"error": {"reason": "disk full"}}}}},
+            {"type": "tool_call", "subtype": "started", "call_id": "call-1", "tool_call": {"editToolCall": {"args": {"path": "denied.txt"}}}},
+            {"type": "tool_call", "subtype": "completed", "call_id": "call-1", "tool_call": {"editToolCall": {"result": {"error": {"error": "disk full"}}}}},
             {"type": "result", "subtype": "success", "is_error": False, "result": "Write failed"},
         ])
         with self.assertRaisesRegex(live.HarnessError, "other than policy"):
@@ -335,11 +556,7 @@ class CursorLiveHarnessTest(unittest.TestCase):
             if "proposed.txt" in prompt:
                 return live.CommandResult([], 0, json_result("PROPOSED_ONLY"), "")
             if "denied.txt" in prompt:
-                stream = [
-                    {"type": "tool_call", "subtype": "started", "call_id": "call-denied", "tool_call": {"writeToolCall": {"args": {"path": "denied.txt"}}}},
-                    {"type": "tool_call", "subtype": "completed", "call_id": "call-denied", "tool_call": {"writeToolCall": {"args": {"path": "denied.txt"}, "result": {"denied": {"reason": "policy"}}}}},
-                    {"type": "result", "subtype": "success", "is_error": False, "result": "Write denied"},
-                ]
+                stream = observed_deny_stream(str(workspace / "denied.txt"))
                 return live.CommandResult([], 0, "\n".join(json.dumps(item) for item in stream), "")
             if "allowed.txt" in prompt:
                 (workspace / "allowed.txt").write_text("ALLOWED_CONTROL\n", encoding="utf-8")

@@ -23,6 +23,13 @@ from typing import Callable, Mapping, Sequence
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_FLAGS = ("--print", "--force", "--workspace", "--trust", "--mode", "--output-format")
+WRITE_TOOL_KINDS = ("editToolCall", "writeToolCall")
+SHELL_TOOL_KIND = "shellToolCall"
+
+
+def tool_kinds(tool_call: Mapping[str, object]) -> list[str]:
+    """Return every tool key in a stream event; valid events name exactly one."""
+    return [name for name in tool_call if name.endswith("ToolCall")]
 DISPOSABLE_MARKER = ".context-os-cursor-live-disposable"
 
 
@@ -169,33 +176,98 @@ def require_denied_write_attempt(
     ]
     if len(terminal) != 1 or not isinstance(terminal[0].get("result"), str):
         raise HarnessError(f"{subject} did not complete with one successful stream result")
-    attempts: dict[str, Mapping[str, object]] = {}
+    # Cursor CLI 2026.09.23-86fc751 reports file writes as editToolCall. Its
+    # completed event omits args, so completions match their started call_id.
+    # The whole stream is checked. The project denies every write, so every
+    # write must stay in the workspace and every completion must be a policy
+    # denial for its own started target; one must be the requested file.
+    # Each started call_id must be completed exactly once as that same kind.
+    root = workspace.resolve()
+    expected = (root / filename).resolve(strict=False)
+
+    def resolve(path: str) -> Path:
+        return Path(path).resolve(strict=False) if Path(path).is_absolute() else (root / path).resolve(strict=False)
+
+    attempts: dict[str, tuple[str, Path]] = {}
+    completed: set[str] = set()
+    shell_calls: dict[str, bool] = {}
+    denied = False
     for event in events:
+        call_id = event.get("call_id")
         tool_call = event.get("tool_call")
+        if isinstance(call_id, str) and call_id in attempts:
+            kind, target = attempts[call_id]
+            if (
+                event.get("subtype") != "completed"
+                or call_id in completed
+                or not isinstance(tool_call, dict)
+                or tool_kinds(tool_call) != [kind]
+                or not isinstance(tool_call[kind], dict)
+            ):
+                raise HarnessError(f"{subject} returned an ambiguous write event")
+            completed.add(call_id)
+            write = tool_call[kind]
+            outcome = write.get("result")
+            payload = outcome.get("writePermissionDenied") if isinstance(outcome, dict) else None
+            reported = payload.get("path") if isinstance(payload, dict) else None
+            if (
+                not isinstance(outcome, dict)
+                or set(outcome) != {"writePermissionDenied"}
+                or not isinstance(payload, dict)
+                or not isinstance(reported, str)
+                or (reported and resolve(reported) != target)
+                or target.name not in str(payload.get("error", ""))
+            ):
+                raise HarnessError(f"{subject} write failed for a reason other than policy denial")
+            denied = denied or target == expected
+            continue
         if not isinstance(tool_call, dict):
             continue
-        write = tool_call.get("writeToolCall")
-        args = write.get("args") if isinstance(write, dict) else None
-        path = args.get("path") if isinstance(args, dict) else None
-        call_id = event.get("call_id")
-        if not isinstance(path, str) or not isinstance(call_id, str) or Path(path).name != filename:
-            continue
-        target = (workspace / path).resolve(strict=False) if not Path(path).is_absolute() else Path(path).resolve(strict=False)
-        try:
-            target.relative_to(workspace.resolve())
-        except ValueError as exc:
-            raise HarnessError(f"{subject} attempted a write outside the disposable workspace") from exc
-        if event.get("subtype") == "started":
-            attempts[call_id] = write
-        elif event.get("subtype") == "completed" and call_id in attempts:
-            outcome = write.get("result") if isinstance(write, dict) else None
-            if isinstance(outcome, dict) and "error" in outcome:
-                raise HarnessError(f"{subject} write failed for a reason other than policy denial")
-            if isinstance(outcome, dict) and "success" not in outcome and any(
-                key in outcome for key in ("denied", "rejected")
+        if SHELL_TOOL_KIND in tool_call:
+            # The control also denies Shell(*), so no shell command may run.
+            shell = tool_call[SHELL_TOOL_KIND]
+            if (
+                not isinstance(shell, dict) or not isinstance(call_id, str)
+                or tool_kinds(tool_call) != [SHELL_TOOL_KIND]
             ):
-                return
-    raise HarnessError(f"{subject} did not record a rejected denied write through Cursor")
+                raise HarnessError(f"{subject} returned an ambiguous shell event")
+            if event.get("subtype") == "started":
+                if call_id in shell_calls:
+                    raise HarnessError(f"{subject} returned an ambiguous shell event")
+                shell_calls[call_id] = False
+            elif event.get("subtype") == "completed":
+                if shell_calls.get(call_id) is not False:
+                    raise HarnessError(f"{subject} returned an ambiguous shell event")
+                outcome = shell.get("result")
+                if not isinstance(outcome, dict) or set(outcome) != {"permissionDenied"}:
+                    raise HarnessError(f"{subject} ran a shell command despite the project deny")
+                shell_calls[call_id] = True
+            continue
+        kinds = [kind for kind in WRITE_TOOL_KINDS if kind in tool_call]
+        if not kinds:
+            continue
+        if len(kinds) != 1 or tool_kinds(tool_call) != kinds or not isinstance(tool_call[kinds[0]], dict) or not isinstance(call_id, str):
+            raise HarnessError(f"{subject} returned an ambiguous write event")
+        write = tool_call[kinds[0]]
+        if event.get("subtype") == "started":
+            args = write.get("args")
+            path = args.get("path") if isinstance(args, dict) else None
+            if not isinstance(path, str) or not path:
+                raise HarnessError(f"{subject} returned a write without a target path")
+            target = resolve(path)
+            try:
+                target.relative_to(root)
+            except ValueError as exc:
+                raise HarnessError(f"{subject} attempted a write outside the disposable workspace") from exc
+            attempts[call_id] = (kinds[0], target)
+        elif event.get("subtype") == "completed":
+            raise HarnessError(f"{subject} returned an ambiguous write event")
+    if not all(shell_calls.values()):
+        raise HarnessError(f"{subject} left a shell command without a denial")
+    if any(call_id not in completed for call_id in attempts):
+        raise HarnessError(f"{subject} left a write attempt without a denial")
+    if not denied:
+        raise HarnessError(f"{subject} did not record a rejected denied write through Cursor")
 
 
 def snapshot(root: Path) -> dict[str, str]:
