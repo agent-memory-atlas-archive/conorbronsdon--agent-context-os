@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Fixed
+- Hermes live conformance checks provider keys before model calls and records a
+  separate setup control. Parallel `skill_view` requests now retain their
+  matching result across other tool events; the adapter documents the
+  v0.21.4 stream flags and terminal credential scrubbing (#214).
 - The long continuity `handoff-sentences` fixture keeps interrupted status and
   its qualifiers in one sentence, with full-answer citation quotes (#218).
 - A 15-trial same-day rerun (`docs/evidence/continuity-rerun-218-2026-09-26/`)
