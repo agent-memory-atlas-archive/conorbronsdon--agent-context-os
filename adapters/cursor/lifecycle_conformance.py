@@ -105,7 +105,8 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
     if source_sha != harness.evidence.source_sha:
         raise HarnessError("source revision mismatch")
     controls = {}
-    handoff_fact = "The synthetic fixture must verify continuity using " + secrets.token_hex(16) + "."
+    handoff_value = secrets.token_hex(16)
+    handoff_fact = "The synthetic fixture must verify continuity using " + handoff_value + "."
     facts = {
         "setup": "The fixture tests portable continuity.",
         "update": "The synthetic fixture completed its Cursor setup test.",
@@ -212,8 +213,11 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
             answer = require_json_result(harness.agent(root,
                 result["prompts"]["handoff"],
                 "--mode", "ask"), "new-session handoff")
-            if handoff_fact not in answer or state(root) != before:
-                raise HarnessError("new session did not recover the saved next action read-only")
+            result["handoff_value_recovered"] = handoff_value in answer
+            result["handoff_read_only"] = state(root) == before
+            result["handoff_answer_sha256"] = hashlib.sha256(answer.encode()).hexdigest()
+            if not result["handoff_value_recovered"] or not result["handoff_read_only"]:
+                raise HarnessError(f"handoff failed: value recovered={result['handoff_value_recovered']}, read-only={result['handoff_read_only']}")
             controls[current] = "passed"
             harness.verify_binary()
             if repository_source_sha() != source_sha:

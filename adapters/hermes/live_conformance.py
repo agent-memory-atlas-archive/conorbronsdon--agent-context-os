@@ -143,6 +143,23 @@ def discovery_prompt() -> str:
             "workflow. No tools are available for this instruction-delivery control.")
 
 
+def lifecycle_prompt_for(phase: str) -> str:
+    """Supply the reviewed synthetic input a user would provide to each skill."""
+    detail = {
+        "setup": ("Audience confirmed: synthetic public fixture only. Create a kernel setup proposal "
+                  "for identity/hermes-fixture.md containing '# Synthetic fixture identity\\n\\n"
+                  "The fixture tests portable continuity.\\n'."),
+        "start": "Run the read-only start inventory and summarize the saved fixture context.",
+        "update": "Create a kernel update proposal recording: The synthetic fixture completed its Hermes setup test.",
+        "end": ("Create a kernel end proposal recording: The synthetic fixture completed its Hermes lifecycle test. "
+                "Next action: The synthetic fixture should verify continuity in a new session."),
+    }[phase]
+    return (detail + " Use this colocated repository and the preloaded lifecycle skill. "
+            "For mutations, write payloads only under .context-os/inputs, create exactly one proposal, "
+            "display its diff and digest, and stop before apply. Do not commit, push, delegate, "
+            "or use native memory as proposal input.")
+
+
 def verify_instruction_delivery(raw: str, canaries: dict[str, str], phase: str) -> list[dict]:
     """A separate tool-free turn proves delivery; lifecycle reads cannot prove it."""
     # v0.21.5 resolves the unknown name to an empty tool selection but its CLI
@@ -756,7 +773,7 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
             proposals = set((fixture / ".context-os" / "proposals").glob("*.json"))
             prompt = prompt_for(phase)
             if discovery_mode == "tool-free":
-                prompt = prompt.split(" Also report the fixture canary")[0]
+                prompt = lifecycle_prompt_for(phase)
             argv = [*binary, "chat", "-Q", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
                     "--run-budget", str(run_budget), "--max-turns", str(max_turns), "-s", f"context-{phase}", "-q", prompt]
             call = command(argv, fixture, env, timeout=run_budget + 30, raw_output=True)
