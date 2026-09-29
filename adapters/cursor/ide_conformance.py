@@ -286,7 +286,9 @@ def record(args: argparse.Namespace) -> None:
     short_update = require_text(observations, "short_update_resolution")
     if short_update not in SHORT_UPDATE_RESULTS:
         raise HarnessError("short_update_resolution is not a supported observation")
-    required_attestations = ["ask_write_denied", "short_update_not_executed"]
+    required_attestations = [
+        "ask_write_denied", "short_update_not_executed", "implicit_skill_body_not_loaded",
+    ]
     if characterize:
         required_attestations.append("file_write_control_observed")
     if write_behavior == "approval-required":

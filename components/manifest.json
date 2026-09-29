@@ -975,6 +975,18 @@
                 {
                     "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-5da7b9b.json",
                     "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/host-diagnostic.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/observations.json",
+                    "policy": "development"
                 }
             ]
         },

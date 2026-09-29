@@ -105,6 +105,7 @@ class CursorIdeHarnessTest(unittest.TestCase):
             "agent_write_denied": True,
             "agent_write_approved": True,
             "short_update_not_executed": True,
+            "implicit_skill_body_not_loaded": True,
         }
 
     def test_record_verifies_canaries_and_exact_file_outcome(self) -> None:
@@ -230,6 +231,23 @@ class CursorIdeHarnessTest(unittest.TestCase):
             with self.assertRaises(ide.HarnessError):
                 ide.record(args)
         self.assertFalse(self.evidence.exists())
+
+    def test_final_reply_cannot_hide_implicit_skill_body_loading(self) -> None:
+        args, observations = self.diagnostic_fixture()
+        for characterize in (False, True):
+            for value in (False, None):
+                with self.subTest(characterize=characterize, attestation=value):
+                    args.characterize_file_writes = characterize
+                    candidate = dict(observations, agent_write_denied=True, agent_write_approved=True)
+                    if value is None:
+                        candidate.pop("implicit_skill_body_not_loaded")
+                    else:
+                        candidate["implicit_skill_body_not_loaded"] = value
+                    args.observations.write_text(json.dumps(candidate), encoding="utf-8")
+                    with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+                        with self.assertRaisesRegex(ide.HarnessError, "implicit_skill_body_not_loaded"):
+                            ide.record(args)
+                    self.assertFalse(self.evidence.exists())
 
     def test_record_is_create_only_and_requires_attestation(self) -> None:
         self.evidence.write_text("existing\n", encoding="utf-8")

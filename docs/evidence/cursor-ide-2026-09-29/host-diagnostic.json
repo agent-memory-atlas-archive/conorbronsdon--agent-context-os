@@ -1,0 +1,26 @@
+{
+  "source_sha": "bc4aa5e18857f4fcfa247fbbae23eca649dbf7c6",
+  "version": "3.22.7",
+  "binary_sha256": "62d9a2b6512b07460cc00dd55a250ca9076e96ff9caed4949a9417620a01a7da",
+  "status": "failed",
+  "checks": {
+    "root": true,
+    "nested": true,
+    "rule": true,
+    "explicit": true,
+    "binary_unchanged": true
+  },
+  "mutated_paths": [
+    "approved-write.txt",
+    "denied-write.txt"
+  ],
+  "failure": "implicit skill body was read and UI reported Used contextos-live-explicit, despite final response being the root canary",
+  "notes": [
+    "Nested canary was found by workspace search.",
+    "Rule control ran in Agent mode; remaining discovery controls used Ask.",
+    "Agent file writes were immediate, with only post-edit Keep/Review.",
+    "Explicit slash menu was selected; matching response showed no tool call.",
+    "Short update was observed in menu and never submitted."
+  ],
+  "recorded_at": "2026-09-29T07:56:49.697162+00:00"
+}

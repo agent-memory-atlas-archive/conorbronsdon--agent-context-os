@@ -187,6 +187,10 @@ root and nested instructions, an always-applied project rule, installed-build
 instruction/rule conflict behavior, the explicit skill's exact canary response,
 implicit-skill must-not-fire behavior, Ask-mode preservation, interactive denial and scoped
 approval, native-profile isolation, and absence of project MCP and hook config.
+Inspect the expanded tool trace for the implicit turn and affirm
+`implicit_skill_body_not_loaded: true` only when neither a skill invocation nor
+a direct skill-body read occurred. A final reply containing another canary does
+not establish this control. The recorder rejects a missing or false attestation.
 The prepared IDE workspace and profile do not deny direct reads of the skill
 file. A matching explicit response therefore cannot establish that the slash
 command resolved; the manifest and evidence record `explicit_skill_must_fire`
@@ -232,6 +236,14 @@ skill canary. The Agent-mode denial control failed: the IDE wrote the file
 before any approval prompt, and Review, Keep, and Undo came only afterwards.
 Cursor then updated itself to `3.22.7` on exit, so `record` refused the run.
 The IDE surface remains unverified.
+
+### September 29, 2026 IDE operator run (failed control)
+
+A fresh IDE `3.22.7` run matched the canaries, resolved an explicitly selected
+slash skill, and preserved Ask-mode files. The implicit turn nevertheless read
+the explicit-only skill body while returning a different final canary. Agent
+file writes were immediate. The [record](../../docs/evidence/cursor-ide-2026-09-29/README.md)
+explains these limits and the recorder fix; the IDE remains experimental.
 
 ### CLI lifecycle conformance
 
