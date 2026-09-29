@@ -242,8 +242,9 @@ passes. The strict recorder retains its existing checks; its diagnostic output
 cannot promote a surface. The IDE remains experimental pending review of the
 bounded lifecycle evidence and remaining invocation/discovery limits. The
 runtime's overall tier reflects its strongest surface; CLI evidence cannot
-promote the IDE. The [ACP connection foundation](../acp/README.md) is a separate,
-offline-tested integration path; its live app test remains deferred.
+promote the IDE. The [ACP connection foundation](../acp/README.md) is a separate
+integration path with bounded live T3 evidence and a failed Supervised file-edit
+approval control. It has not passed full ACP lifecycle conformance.
 
 ### September 26, 2026 IDE operator run (diagnostic)
 

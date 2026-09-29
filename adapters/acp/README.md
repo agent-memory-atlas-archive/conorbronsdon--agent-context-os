@@ -1,9 +1,11 @@
 # ACP connection foundation
 
-Status: offline protocol tests only. No installed Cursor or Hermes ACP lifecycle
-has passed conformance, and no T3 application smoke test has run. The interactive
-test is deferred at the operator's request. Existing CLI support tiers do not
-extend to an ACP connection automatically.
+Status: offline protocol tests and bounded live synthetic smoke tests. Cursor
+connected through ACP and T3; Hermes connected directly through ACP. Reads and
+explicit skills worked, but T3's Cursor Supervised file-edit approval control
+failed. See the [September 29 evidence](../../docs/evidence/cursor-ide-2026-09-29/README.md#resumed-acp-and-t3-smoke-september-29).
+Neither provider has passed full ACP lifecycle conformance. Existing CLI support
+tiers do not extend to an ACP connection automatically.
 
 T3 connects Cursor through
 [`cursor-agent acp`](https://github.com/pingdotgg/t3code/blob/d2c9281b8112dc3b2991642c4bdb985e4b08b9bb/apps/server/src/provider/acp/CursorAcpSupport.ts).
@@ -46,8 +48,8 @@ They use synthetic messages, launch no agents, and make no model requests.
 
 | Provider | Documented entry point | Remaining verification |
 | --- | --- | --- |
-| Cursor | `cursor-agent acp` / `agent acp` | Authentication, session creation, explicit skill resolution, streamed lifecycle turns, permissions, cancellation, and fresh-session handoff |
-| Hermes | `hermes acp` | Optional ACP dependency, isolated configuration and MCP startup, skill discovery, permissions, lifecycle turns, and persisted-session behavior |
+| Cursor | `cursor-agent acp` / `agent acp` | Full lifecycle turns, reliable permission gating, cancellation, and fresh-session repository handoff; preserve streamed commentary separately from final answers |
+| Hermes | `hermes acp` | App integration, permissions, lifecycle turns, configured MCP behavior, and persisted-session behavior |
 
 Use [Cursor's ACP reference](https://cursor.com/docs/cli/acp) and the
 [ACP permission contract](https://agentclientprotocol.com/protocol/v1/tool-calls)
@@ -55,8 +57,10 @@ for wire behavior. Hermes documents its
 [ACP entry point](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/acp.md)
 and [implementation boundaries](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/developer-guide/acp-internals.md).
 The earlier [initialization probe](../../docs/evidence/cursor-ide-2026-09-29/README.md#acp-integration-follow-up)
-established only Cursor's handshake; the isolated Hermes test installation lacked
-the optional ACP dependency. Neither result establishes a working app integration.
+established only Cursor's handshake; the isolated Hermes test installation then
+lacked the optional ACP dependency. The later bounded smoke test installed that
+dependency only in the disposable test environment. T3 was tested with Cursor;
+Hermes was tested with a separate ACP client, not through T3.
 
 Before a live test, use an exact source commit, disposable synthetic repository,
 fresh provider configuration, recorded binary version, and explicit model-traffic
