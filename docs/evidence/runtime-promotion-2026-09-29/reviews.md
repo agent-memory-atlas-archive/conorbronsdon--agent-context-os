@@ -5,6 +5,13 @@ source and tests; no credentials, private context, or host configuration.
 Reviewers have no tools and no edit assignment. There is no completed final
 independent sign-off yet.
 
+The implementation candidate is `e84e094e4131a15d51e88d92399ed2c3816a3bef`.
+Its final strict validation passed 972 tests (47 skipped) and every repository
+check. The source-remote removal was also applied to Hermes fixture preparation
+after the reviewed `5da7b9b` revision, with a passing regression test. Final
+primary review must cover that change and the promotion metadata/documentation;
+the earlier code reviews do not cover the complete candidate.
+
 ## Primary review
 
 Authenticated `claude-opus-5-5` reviewed

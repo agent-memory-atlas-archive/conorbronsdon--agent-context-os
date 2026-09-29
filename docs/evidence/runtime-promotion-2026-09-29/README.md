@@ -92,9 +92,11 @@ Hermes built-ins.
 
 ## Validation and review
 
-The strict repository check passed 968 tests (47 skipped), hook and portability
-checks, links, manifests, schemas, and generated runtime artifacts before the
-last independent-review hardening. Affected tests were rerun after changes.
+Final `bash scripts/validate-all.sh` passed on implementation commit
+`e84e094e4131a15d51e88d92399ed2c3816a3bef`: 972 tests in 876.839 seconds,
+47 skipped, plus hook and portability checks, links, manifests, schemas, and
+generated runtime artifacts. The earlier 968-test run and focused regressions
+also passed. The subsequent closeout commit changes evidence documentation only.
 
 See [independent review status](reviews.md). A live pass is not independent
 review approval, and no merge or release is authorized by these artifacts.
