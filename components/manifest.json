@@ -397,6 +397,10 @@
                     "policy": "development"
                 },
                 {
+                    "path": "integrations/entries/pi-dash.json",
+                    "policy": "development"
+                },
+                {
                     "path": "integrations/entries/readwise-mcp.json",
                     "policy": "development"
                 },
