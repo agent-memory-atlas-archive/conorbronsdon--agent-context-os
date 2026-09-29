@@ -149,3 +149,50 @@ and a missing file-edit approval prompt is not a failed shell-approval test.
 A future promotion-contract revision should state these capabilities separately
 and verify the promises it makes. This record preserves the current failed
 controls and does not itself revise the gate or promote the IDE.
+
+## Offline ACP foundation, September 29
+
+Implementation commit: `eec46e123b1e79d1785dd3553f5ab9f1aea739b8`.
+The [shared ACP foundation](../../../adapters/acp/README.md) adds message
+correlation, streamed notification forwarding, cancellation, and default refusal
+of permission requests and blocking Cursor extensions. It launches no processes
+and is not a complete ACP client. Eight synthetic protocol tests passed; the
+Cursor descriptor suite passed nine tests with one installed-client check skipped.
+The live ACP/T3 smoke test is deferred at the operator's request. No app window, live ACP/IDE session, dependency installation, or global
+configuration change was used. The separate tool-free review below used Hermes
+for inference only.
+
+The Cursor support contract now separates required lifecycle controls from
+individual host capability claims. The earlier failed controls remain failed;
+neither IDE nor ACP support is promoted by this change.
+
+Operational review through `inclusionai/ling-3.0-flash-sante:free` completed on
+that exact commit using the inspected public packet, Hermes with tools disabled,
+and zero prompt/completion prices verified in the live catalog. Packet SHA-256:
+`fb4d2dc278c71bce2212985270f126749559803270fd789f085f53a7adcc57aa`.
+The stream contained system, text, and result events only, with 6,117 input and
+10,962 output tokens. Its four findings were checked against actual files:
+
+- Result payload validation is deliberately delegated to the future session
+  layer; the README explicitly requires capability/initialization validation.
+  No current downstream consumer or live-conformance claim was affected.
+- `close()` returns interrupted IDs and methods. The caller retains the request
+  returned by `request()`; this module does not promise session recovery.
+- The claim that cancellation needs `requestId` contradicts the official
+  [ACP cancellation contract](https://agentclientprotocol.com/protocol/v1/prompt-turn#cancellation),
+  which specifies `sessionId` and a notification, matching the code.
+- Outbound requests use integer IDs. Inbound request IDs belong to the peer's
+  separate request direction and are echoed unchanged. A response to our response
+  is not a valid outstanding request and should be rejected.
+
+None established an introduced defect in the bounded implementation. This does
+not replace primary review. The earlier primary quota failures and exhausted
+adversarial candidate budget remain recorded above; no additional attempt is
+claimed for those lanes on this commit. Required reviews remain pending, and
+nothing is pushed, merged, or published.
+
+Full repository validation on the implementation commit passed 986 tests in
+1,032.496 seconds, with 47 skipped, followed by every repository check and
+`All validation passed`. The native wrapper exited 0. The log is retained in the
+operator-owned task scratch directory as `validation-acp-foundation.log`.
+This closeout changes evidence documentation only; the reviewed code is unchanged.
