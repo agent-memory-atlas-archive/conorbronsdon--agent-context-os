@@ -159,6 +159,78 @@ class CursorIdeHarnessTest(unittest.TestCase):
             with self.assertRaisesRegex(ide.HarnessError, "denied control wrote"):
                 ide.record(args)
 
+    def diagnostic_fixture(self):
+        manifest = self.prepare()
+        (self.profile / "profile-marker").write_text("used\n", encoding="utf-8")
+        (self.workspace / ide.APPROVED_FILE).write_text(ide.APPROVED_CONTENT, encoding="utf-8")
+        (self.workspace / "denied-write.txt").write_text(ide.DENIED_CONTENT, encoding="utf-8")
+        observations = self.valid_observations(manifest["canaries"])
+        observations.pop("agent_write_denied")
+        observations.pop("agent_write_approved")
+        observations.update(agent_write_behavior="immediate", file_write_control_observed=True)
+        path = self.root / "observations.json"
+        path.write_text(json.dumps(observations), encoding="utf-8")
+        args = argparse.Namespace(
+            manifest=self.manifest, observations=path, evidence=self.evidence,
+            acknowledge_operator_attestation=True, characterize_file_writes=True,
+        )
+        return args, observations
+
+    def test_immediate_write_diagnostic_cannot_claim_approval_or_promotion(self) -> None:
+        args, _ = self.diagnostic_fixture()
+        with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+            ide.record(args)
+        evidence = json.loads(self.evidence.read_text(encoding="utf-8"))
+        self.assertEqual("operator-attested-write-characterization", evidence["evidence_kind"])
+        self.assertIs(False, evidence["promotion_eligible"])
+        self.assertEqual("immediate", evidence["agent_write_behavior"])
+        self.assertNotIn("interactive_denial_preserves_files", evidence["attested_controls"])
+        self.assertNotIn("interactive_approval_is_scoped", evidence["attested_controls"])
+        self.assertIn("explicit_skill_must_fire", evidence["unverified_controls"])
+
+    def test_strict_record_does_not_accept_diagnostic_immediate_write(self) -> None:
+        args, observations = self.diagnostic_fixture()
+        args.characterize_file_writes = False
+        observations.update(agent_write_denied=True, agent_write_approved=True)
+        args.observations.write_text(json.dumps(observations), encoding="utf-8")
+        with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+            with self.assertRaisesRegex(ide.HarnessError, "denied control wrote"):
+                ide.record(args)
+        self.assertFalse(self.evidence.exists())
+
+    def test_diagnostic_still_rejects_unrelated_or_ask_writes(self) -> None:
+        args, _ = self.diagnostic_fixture()
+        for name in ("ask-write.txt", "unrelated.txt"):
+            with self.subTest(name=name):
+                path = self.workspace / name
+                path.write_text("unexpected", encoding="utf-8")
+                with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+                    with self.assertRaises(ide.HarnessError):
+                        ide.record(args)
+                path.unlink()
+                self.assertFalse(self.evidence.exists())
+
+    def test_diagnostic_requires_observation_and_exact_immediate_write(self) -> None:
+        args, observations = self.diagnostic_fixture()
+        for missing in ("agent_write_behavior", "file_write_control_observed"):
+            with self.subTest(missing=missing):
+                reduced = {key: value for key, value in observations.items() if key != missing}
+                args.observations.write_text(json.dumps(reduced), encoding="utf-8")
+                with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+                    with self.assertRaises(ide.HarnessError):
+                        ide.record(args)
+        args.observations.write_text(json.dumps(observations), encoding="utf-8")
+        path = self.workspace / "denied-write.txt"
+        path.write_text("wrong content", encoding="utf-8")
+        with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+            with self.assertRaises(ide.HarnessError):
+                ide.record(args)
+        path.unlink()
+        with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+            with self.assertRaises(ide.HarnessError):
+                ide.record(args)
+        self.assertFalse(self.evidence.exists())
+
     def test_record_is_create_only_and_requires_attestation(self) -> None:
         self.evidence.write_text("existing\n", encoding="utf-8")
         with self.assertRaisesRegex(ide.HarnessError, "refusing to overwrite"):

@@ -198,6 +198,17 @@ and file-state controls it verifies itself. For the short `/update` collision, o
 menu and record `builtin`, `skill`, `ambiguous`, or `unavailable`; never submit
 or execute it.
 
+For builds that apply Agent file edits immediately, use
+`record --characterize-file-writes` to retain a diagnostic without weakening the
+strict approval test. Record `agent_write_behavior` as `immediate` or
+`approval-required`, and attest `file_write_control_observed: true`. In the
+immediate case, leave `denied-write.txt` with exactly `DENIED_WRITE_CONTROL`;
+do not undo the edit or claim a denial occurred. Ask-mode and unrelated-file
+preservation still apply. The diagnostic is explicitly `promotion_eligible:
+false`; it does not establish shell approvals, native slash invocation, or the
+Context OS proposal/apply lifecycle. The default recorder continues to reject
+an immediate denial-control write.
+
 Project-owned `.cursor/` configuration is permitted by workspace validation.
 Strict maintainer validation still requires every template-owned path to have
 an explicit component owner.
