@@ -67,3 +67,41 @@ were demonstrably required to prevent cache pollution in run 2.
 
 Final primary and the first additional-family review remain required before merge-ready
 status. No push, merge, or publication has occurred.
+
+## Draft PR and final-source validation follow-up
+
+The later accumulated branch was pushed as draft
+[PR #227](https://github.com/conorbronsdon/agent-context-os/pull/227), with head
+`8d2f6bedd91f5a608accbe07ca9d27d1c29a8b75`. No merge or release is implied.
+Cursor IDE, ACP, and subsequent review observations are recorded separately in
+the [IDE evidence](../cursor-ide-2026-09-29/README.md).
+
+An earlier full run had one README positioning assertion failure. Commit
+`8d2f6be` restored the accurate product-description phrase without weakening the
+test; all 24 positioning tests passed. A fresh canonical run on that unchanged
+commit then passed all 986 tests in 1,028.074 seconds, with 47 skipped, and every
+repository check; its wrapper exited 0. The operator-owned scratch log is
+`acos-acp-resume-0929/validation-final-8d2f6be.log`.
+
+[Hosted validation run 36607243722](https://github.com/conorbronsdon/agent-context-os/actions/runs/36607243722)
+also passed on that head. Linux and Python 3.10 each passed 986 tests with 26
+skips and all canonical checks. Windows passed 986 tests with 18 skips and its
+materialization check. The macOS portability and separate SSOT jobs passed.
+Different skip counts reflect the tested environments, not additional live-host
+promotion evidence.
+
+Independent review still blocks merge readiness. Authenticated Claude continued
+to report its weekly limit. For the bounded Pi Dash catalog subset, three paid Go
+fallbacks (`glm-5.3`, `kimi-k3`, `minimax-m3`) each returned HTTP 429; that fallback
+candidate budget is exhausted. Free upstream-comparison review through
+`inclusionai/ling-3.0-flash-sante:free` and adversarial review through
+`poolside/laguna-s-2.1:free` completed on `fff0c33`, with no verified introduced
+defect after checking the cited upstream files. Those subset reviews do not
+replace the pending full runtime-promotion reviews above.
+
+The later framing-only change received a tool-free Ling review on `fe3a4bd`.
+Its filename, source-support, and link objections were rejected against actual
+published assets and repository files; the separate positioning-test regression
+was fixed as described above. Review packets and dispositions remain in the
+operator-owned task scratch with a 2026-10-06 retention review date. This
+follow-up adds changelog and evidence prose only; implementation is unchanged.
