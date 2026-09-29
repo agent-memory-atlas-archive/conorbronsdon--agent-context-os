@@ -987,6 +987,10 @@
                 {
                     "path": "docs/evidence/cursor-ide-2026-09-29/observations.json",
                     "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/lifecycle.json",
+                    "policy": "development"
                 }
             ]
         },

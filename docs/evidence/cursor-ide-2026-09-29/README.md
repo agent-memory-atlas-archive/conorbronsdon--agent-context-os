@@ -25,6 +25,9 @@ This is profile isolation, not an OS sandbox.
   activity summary listed two `SKILL.md` reads. Its final reply nevertheless
   returned the root canary. This fails the skill-body must-not-load control.
   Final-answer comparison alone would have incorrectly treated it as a pass.
+  Native metadata confirms ordinary `read_file_v2` calls, not a distinct native
+  skill-invocation tool. The turn also searched its own fixture's native chat
+  transcripts. The sanitized tool metadata is embedded in the host diagnostic.
 - The explicit skill was typed, selected from the real slash menu, and submitted.
   It returned its canary with no visible tool call. Pasting a slash string alone
   had not opened the picker. The skill file had been opened while inspecting
@@ -42,7 +45,37 @@ The IDE recorder now requires `implicit_skill_body_not_loaded: true` based on
 inspection of the tool trace, in addition to the final reply check. Both strict
 and write-characterization modes reject a missing or false attestation. This
 fix improves evidence quality; it does not fix Cursor's observed skill access.
-The IDE remains experimental. The shipped lifecycle needs its own evidence.
+The IDE remains experimental. These host failures are not waived by the
+separate lifecycle results below.
+
+## Shipped lifecycle results
+
+[Lifecycle evidence](lifecycle.json) records real desktop IDE invocation of
+`/context-setup`, `/context-start`, `/context-update`, and `/context-end`, followed
+by a fresh `/context-start` chat on source
+`02f2bd17f75936b37e103b20ff94b73aeb0e1361`. The binary stayed unchanged through
+exit. Native user-message metadata records `grok-4.7`; that is an observed model
+selection, not an independently verified backend identity.
+
+Setup, update, and end each created exactly one proposal and stopped before
+apply. The operator inspected the displayed diff, checked wrong-digest rejection,
+and applied the exact digest. Receipts matched their proposal digests and runtime.
+Exact changed-file contents, unrelated files, and Git control metadata passed
+verification. Reapplying update and end failed as stale without further changes.
+Start and handoff preserved every fixture file and Git control metadata.
+
+The handoff prompt omitted the random verification value. Its separate chat read
+the saved session and returned the exact value; inspected tool paths and shell
+commands stayed within the repository. The same isolated profile retained prior
+selected skill keys, so this does not establish fresh-profile isolation. Setup
+only added one synthetic identity file: the kernel correctly continued to report
+`initialized: false` for the remaining template state. This is a bounded
+proposal/apply and continuity test, not complete onboarding validation.
+
+Initial setup/start shell attempts missed PowerShell's call operator and were
+retried successfully. Later prompts explicitly supplied that Windows requirement.
+Tool status `completed` does not imply command success. The evidence preserves
+selected tool metadata and final replies, without reasoning or account data.
 
 ## Validation and review
 
@@ -54,3 +87,8 @@ with no model response; it is `setup_failed`, not sign-off. Packet SHA-256:
 `0714298a51b02a916940fd981e333c9cc186d2a161dddb864118ac2d16fe9a75`.
 The broader [independent review blockers](../runtime-promotion-2026-09-29/reviews.md)
 remain in effect. No merge or publication is established by this record.
+
+Full validation on `02f2bd1` passed 977 tests, with 47 skipped, in 893.790
+seconds, plus all repository checks. A later recorder hardening rejects malformed
+write-behavior values and strict-mode contradictions, and emits the exact
+`implicit_skill_body_not_loaded` attestation. Its focused suite passed 12 tests.

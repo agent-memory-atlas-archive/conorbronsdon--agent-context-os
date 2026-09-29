@@ -54,8 +54,10 @@ this adapter documents only the namespaced commands. Cursor does not document
 whether its built-in `/update` or the discovered `update` skill wins. Do not use
 the short aliases in Cursor, and do not duplicate these names in another Cursor
 skill root. Every shipped lifecycle core and short alias sets
-`disable-model-invocation: true`, so Cursor includes it only after explicit
-slash invocation. The same files also carry Devin's `triggers: ["user"]`; each
+`disable-model-invocation: true` to request explicit slash invocation. This is
+not a file-read boundary: the IDE 3.22.7 implicit control read skill bodies with
+ordinary file tools despite that setting. See the [IDE host and lifecycle evidence](../../docs/evidence/cursor-ide-2026-09-29/README.md).
+The same files also carry Devin's `triggers: ["user"]`; each
 host ignores the other host's extension while the shared procedure remains
 provider-neutral.
 

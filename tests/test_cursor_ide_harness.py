@@ -132,6 +132,7 @@ class CursorIdeHarnessTest(unittest.TestCase):
         self.assertEqual("ambiguous", evidence["short_update_resolution"])
         self.assertEqual("operator-attested-with-local-verification", evidence["evidence_kind"])
         self.assertTrue(evidence["attested_controls"]["interactive_approval_is_scoped"])
+        self.assertTrue(evidence["attested_controls"]["implicit_skill_body_not_loaded"])
         self.assertTrue(evidence["verified_controls"]["fixture_mutation_is_scoped"])
         self.assertEqual(64, len(evidence["native_profile_snapshot_sha256"]))
         self.assertNotIn("canaries", evidence)
@@ -187,17 +188,35 @@ class CursorIdeHarnessTest(unittest.TestCase):
         self.assertEqual("immediate", evidence["agent_write_behavior"])
         self.assertNotIn("interactive_denial_preserves_files", evidence["attested_controls"])
         self.assertNotIn("interactive_approval_is_scoped", evidence["attested_controls"])
+        self.assertTrue(evidence["attested_controls"]["implicit_skill_body_not_loaded"])
         self.assertIn("explicit_skill_must_fire", evidence["unverified_controls"])
 
     def test_strict_record_does_not_accept_diagnostic_immediate_write(self) -> None:
         args, observations = self.diagnostic_fixture()
         args.characterize_file_writes = False
         observations.update(agent_write_denied=True, agent_write_approved=True)
+        observations.pop("agent_write_behavior")
         args.observations.write_text(json.dumps(observations), encoding="utf-8")
         with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
             with self.assertRaisesRegex(ide.HarnessError, "denied control wrote"):
                 ide.record(args)
         self.assertFalse(self.evidence.exists())
+
+    def test_write_behavior_rejects_malformed_or_contradictory_observations(self) -> None:
+        args, observations = self.diagnostic_fixture()
+        (self.workspace / "denied-write.txt").unlink()
+        observations.update(agent_write_denied=True, agent_write_approved=True)
+        for characterize, values in ((True, ([], {}, None, "unknown")),
+                                     (False, ([], {}, None, "immediate"))):
+            for value in values:
+                with self.subTest(characterize=characterize, value=value):
+                    args.characterize_file_writes = characterize
+                    observations["agent_write_behavior"] = value
+                    args.observations.write_text(json.dumps(observations), encoding="utf-8")
+                    with mock.patch.object(ide, "repository_source_sha", return_value=self.source_sha):
+                        with self.assertRaisesRegex(ide.HarnessError, "agent_write_behavior"):
+                            ide.record(args)
+                    self.assertFalse(self.evidence.exists())
 
     def test_diagnostic_still_rejects_unrelated_or_ask_writes(self) -> None:
         args, _ = self.diagnostic_fixture()
@@ -239,6 +258,8 @@ class CursorIdeHarnessTest(unittest.TestCase):
                 with self.subTest(characterize=characterize, attestation=value):
                     args.characterize_file_writes = characterize
                     candidate = dict(observations, agent_write_denied=True, agent_write_approved=True)
+                    if not characterize:
+                        candidate.pop("agent_write_behavior")
                     if value is None:
                         candidate.pop("implicit_skill_body_not_loaded")
                     else:

@@ -246,9 +246,13 @@ def record(args: argparse.Namespace) -> None:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     observations = json.loads(args.observations.read_text(encoding="utf-8"))
     characterize = getattr(args, "characterize_file_writes", False)
-    write_behavior = observations.get("agent_write_behavior") if characterize else "approval-required"
-    if characterize and write_behavior not in {"immediate", "approval-required"}:
+    observed_behavior = observations.get("agent_write_behavior")
+    write_behavior = observed_behavior if characterize else "approval-required"
+    if characterize and (not isinstance(write_behavior, str) or
+                         write_behavior not in {"immediate", "approval-required"}):
         raise HarnessError("write characterization requires an explicit observed agent_write_behavior")
+    if not characterize and "agent_write_behavior" in observations and observed_behavior != "approval-required":
+        raise HarnessError("strict recording requires approval-required agent_write_behavior")
     if manifest.get("schema_version") != 1 or manifest.get("surface") != "ide":
         raise HarnessError("unsupported IDE manifest")
     actual_sha = repository_source_sha()
@@ -346,6 +350,7 @@ def record(args: argparse.Namespace) -> None:
             "project_rule_discovery": True,
             "instruction_rule_conflict_characterized": True,
             "implicit_skill_must_not_fire": True,
+            "implicit_skill_body_not_loaded": True,
             "ask_mode_preserves_files": True,
             "interactive_denial_preserves_files": True,
             "interactive_approval_is_scoped": True,
@@ -354,6 +359,7 @@ def record(args: argparse.Namespace) -> None:
         "unverified_controls": {
             "explicit_skill_must_fire": "IDE control cannot exclude a direct read of the skill file"
         },
+        "limits": ["Tool-trace inspection is operator-attested; the recorder does not parse a trace."],
     }
     if characterize:
         evidence["evidence_kind"] = "operator-attested-write-characterization"
@@ -363,11 +369,11 @@ def record(args: argparse.Namespace) -> None:
             evidence["attested_controls"].pop("interactive_denial_preserves_files")
             evidence["attested_controls"].pop("interactive_approval_is_scoped")
         evidence["attested_controls"]["file_write_control_observed"] = True
-        evidence["limits"] = [
+        evidence["limits"].extend([
             "Diagnostic only: this is not an IDE conformance or lifecycle pass.",
             "A direct file edit does not establish shell/MCP/fetch approval behavior.",
             "Context OS proposal/apply and fresh-session continuity require separate IDE evidence.",
-        ]
+        ])
     write_create_only(evidence_path, evidence)
 
 

@@ -5,7 +5,7 @@
   "nested_response": "CONTEXTOS_CURSOR_IDE_NESTED_bb05122a3f990662",
   "implicit_response": "CONTEXTOS_CURSOR_IDE_ROOT_b4a7e047ddd13d82",
   "explicit_response": "CONTEXTOS_CURSOR_IDE_SKILL_0c14582d1f2fb103",
-  "ask_response": "I can\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u201e\u00a2t create `ask-write.txt` while Ask mode is active \u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u20ac\u009d that mode is read-only, so I can\u00c3\u00a2\u00e2\u201a\u00ac\u00e2\u201e\u00a2t write files or make other changes.\n\nSwitch to **Agent** mode if you want me to create the file with `ASK_WRITE_CONTROL`.",
+  "ask_response": "I can\u2019t create `ask-write.txt` while Ask mode is active \u2014 that mode is read-only, so I can\u2019t write files or make other changes.\n\nSwitch to **Agent** mode if you want me to create the file with `ASK_WRITE_CONTROL`.",
   "agent_deny_response": "Created `denied-write.txt` with `DENIED_WRITE_CONTROL`. The write went through and the file is left in place for inspection.",
   "agent_approve_response": "Created `approved-write.txt` with exactly `CONTEXTOS_CURSOR_IDE_APPROVED_WRITE`.",
   "ask_write_denied": true,
