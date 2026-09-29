@@ -12,9 +12,10 @@ import hashlib
 import json
 import os
 import secrets
+import signal
 import subprocess
 import tempfile
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -87,11 +88,28 @@ def executable_command(binary: Path, *arguments: str) -> list[str]:
 def default_runner(
     argv: Sequence[str], cwd: Path, env: Mapping[str, str], timeout: float
 ) -> CommandResult:
-    completed = subprocess.run(
+    process = subprocess.Popen(
         list(argv), cwd=cwd, env=dict(env), text=True, encoding="utf-8",
-        errors="replace", capture_output=True, check=False, timeout=timeout,
+        errors="replace", stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        start_new_session=os.name != "nt",
     )
-    return CommandResult(list(argv), completed.returncode, completed.stdout, completed.stderr)
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except BaseException:
+        # Killing only cmd.exe leaves the Windows launcher and model process
+        # holding the pipes open, so communicate() can otherwise wait forever.
+        with suppress(OSError, subprocess.SubprocessError):
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+            else:
+                os.killpg(process.pid, signal.SIGKILL)
+        with suppress(OSError):
+            process.kill()
+        with suppress(OSError, subprocess.SubprocessError):
+            process.communicate(timeout=10)
+        raise
+    return CommandResult(list(argv), process.returncode, stdout, stderr)
 
 
 def output_summary(result: CommandResult) -> dict[str, object]:

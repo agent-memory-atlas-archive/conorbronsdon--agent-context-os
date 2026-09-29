@@ -23,8 +23,10 @@ LIFECYCLE = {
 
 
 class CursorDescriptorTest(unittest.TestCase):
-    def test_ide_and_cli_remain_distinct_experimental_surfaces(self) -> None:
-        self.assertEqual("experimental", DESCRIPTOR["support_tier"])
+    def test_cli_promotion_does_not_promote_the_ide(self) -> None:
+        self.assertEqual("first-class", DESCRIPTOR["support_tier"])
+        self.assertEqual("experimental", DESCRIPTOR["surfaces"]["ide"]["support_tier"])
+        self.assertEqual("first-class", DESCRIPTOR["surfaces"]["cli"]["support_tier"])
         self.assertEqual({"ide", "cli"}, set(DESCRIPTOR["surfaces"]))
         ide = DESCRIPTOR["surfaces"]["ide"]
         cli = DESCRIPTOR["surfaces"]["cli"]
@@ -37,7 +39,8 @@ class CursorDescriptorTest(unittest.TestCase):
             ],
             ide["binary_probes"],
         )
-        self.assertEqual([], cli["binary_probes"])
+        self.assertEqual([{"purpose": purpose, "candidates": ["cursor-agent"]}
+                          for purpose in ("availability", "version")], cli["binary_probes"])
         self.assertNotEqual(
             ide["binary_probes"], cli["binary_probes"],
             "IDE availability must not stand in for CLI availability",
@@ -65,7 +68,8 @@ class CursorDescriptorTest(unittest.TestCase):
                 self.assertIn("disable-model-invocation: true", frontmatter)
 
     def test_unverified_hooks_memory_and_collisions_are_not_claimed(self) -> None:
-        self.assertEqual([], DESCRIPTOR["evidence"]["tested_versions"])
+        self.assertEqual([{"surface": "cli", "version": "2026.09.28-64d2043"}],
+                         DESCRIPTOR["evidence"]["tested_versions"])
         for surface_name, surface in DESCRIPTOR["surfaces"].items():
             with self.subTest(surface=surface_name):
                 self.assertEqual("unsupported", surface["capabilities"]["project_hooks"])
@@ -141,8 +145,8 @@ class CursorDescriptorTest(unittest.TestCase):
             "otherwise fail open by default",
             "No Cursor-native memory is synchronized",
             "Never run a `--force` conformance check against a real context repository",
-            "exact-version conformance for both surfaces",
-            "aggregate availability status reflects only",
+            "Each surface's first-class promotion requires its own exact-version conformance",
+            "`available` when both resolve and `mixed` when only one resolves",
             "exact-version and required-flag smoke test",
             "Cursor CLI also reads a root `CLAUDE.md`",
             "removable seed",

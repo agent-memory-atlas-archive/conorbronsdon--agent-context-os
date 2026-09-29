@@ -61,6 +61,17 @@ if sys.argv[sys.argv.index('--format') + 1] != 'stream-json':
     sys.exit(3)
 def emit(event):
     print(json.dumps(event))
+if '-t' in sys.argv and sys.argv[sys.argv.index('-t') + 1] == 'none':
+    if mode == 'discovery-tool-event':
+        emit({'type': 'tool_use', 'name': 'read_file', 'input': {'path': 'AGENTS.md'}})
+    if mode == 'discovery-mutate':
+        (root / 'state/current.md').write_text('changed')
+    values = [canaries['agents'], canaries['context-' + phase]]
+    if mode == 'discovery-missing':
+        values.pop()
+    emit({'type': 'result', 'exit_code': 0, 'text': ' '.join(values)})
+    sys.exit(0)
+
 if mode == 'skill-view-idless-pair':
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': phase}})
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': 'context-' + phase}})
@@ -195,13 +206,25 @@ else:
 
 
 class HermesLiveHarnessTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Materialize the same immutable source tree once, rather than spawning
+        # one git cat-file process per file for every negative control.
+        cls.source_fixture = ROOT / ".hermes-test-root" / ("source-" + uuid.uuid4().hex)
+        cls.source_fixture.parent.mkdir(parents=True, exist_ok=True)
+        copy_tracked_fixture(ROOT, cls.source_fixture, live.git(ROOT, "rev-parse", "HEAD"))
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(cls.source_fixture, ignore_errors=True)
+
     def setUp(self) -> None:
         self.base = ROOT / ".hermes-test-root" / uuid.uuid4().hex
         self.base.mkdir(parents=True)
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
         self.fixture = self.base / "fixture"
         source_sha = live.git(ROOT, "rev-parse", "HEAD")
-        copy_tracked_fixture(ROOT, self.fixture, source_sha)
+        shutil.copytree(self.source_fixture, self.fixture)
         self.home = self.base / "hermes-home"
         self.home.mkdir()
         (self.home / "memories").mkdir()
@@ -252,6 +275,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
             copy_tracked_fixture(ROOT, new_fixture, source_sha)
             subprocess.run(["git", "init", "--quiet"], cwd=new_fixture, check=True)
             subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=new_fixture, check=True)
+            subprocess.run(["git", "remote", "add", "origin", str(ROOT)], cwd=new_fixture, check=True)
             return {"exit_code": 0}
         with mock.patch.object(live, "git", side_effect=clean_git), mock.patch.object(live, "command", side_effect=clone), mock.patch.object(live, "outside_checkouts"):
             prepared = live.prepare(ROOT, new_fixture, new_home, source_sha)
@@ -260,6 +284,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
         self.assertEqual(set(live.SKILLS), set(manifest["skill_source_sha256"]))
         self.assertEqual(set(live.PHASES), set(manifest["prompts"]))
         self.assertTrue(new_home.is_dir())
+        self.assertEqual("", real_git(new_fixture, "remote"))
         self.assertEqual(manifest["fixture_commit"], real_git(new_fixture, "rev-parse", "HEAD"))
         self.assertNotEqual(source_sha, manifest["fixture_commit"])
         self.assertFalse((new_fixture / ".context-os-live-manifest.json").exists())
@@ -324,7 +349,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
             live.new_proposal(self.fixture, set(), "update")
 
     def run_record(self, mode: str = "", input_fn=None, approval_dir=None,
-                   approval_timeout=900, provider="fake", env_allow=(), no_key_check=None) -> dict:
+                   approval_timeout=900, provider="fake", env_allow=(), no_key_check=None, discovery_mode="combined") -> dict:
         original_command = live.command
         def kernel_command(argv, cwd, env=None, timeout=120, raw_output=False):
             if mode == "accept-wrong" and argv[:2] == ["bash", "scripts/contextos.sh"] and "0" * 64 in argv:
@@ -357,7 +382,56 @@ class HermesLiveHarnessTest(unittest.TestCase):
                                    expected_version="Hermes Agent v0.21.4",
                                    approval_dir=approval_dir, approval_timeout=approval_timeout,
                                    manifest_path=self.manifest_path, env_allow=("FAKE_HERMES_MODE", *env_allow),
-                                   no_key_check=(provider == "fake" if no_key_check is None else no_key_check))
+                                   no_key_check=(provider == "fake" if no_key_check is None else no_key_check),
+                                   discovery_mode=discovery_mode)
+
+    def test_tool_free_discovery_allows_later_instruction_reads(self) -> None:
+        report = self.run_record("self-read-agents", discovery_mode="tool-free")
+        self.assertEqual("passed", report["controls"]["run"], report.get("failure"))
+        self.assertEqual("tool-free", report["discovery_mode"])
+        for phase in live.PHASES:
+            self.assertEqual("passed", report["controls"][f"{phase}_discovery"])
+        chats = [call for call in report["commands"] if "chat" in call["argv"]]
+        self.assertEqual(8, len(chats))
+        self.assertTrue(all("-t" in call["argv"] for call in chats[::2]))
+        self.assertTrue(all(call["instruction_self_read"] for call in chats[1::2]))
+
+    def test_tool_free_discovery_rejects_tools(self) -> None:
+        report = self.run_record("discovery-tool-event", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("tool event", report["failure"])
+
+    def test_tool_free_discovery_rejects_missing_canary(self) -> None:
+        report = self.run_record("discovery-missing", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("canary not reported", report["failure"])
+
+    def test_tool_free_discovery_rejects_mutation(self) -> None:
+        report = self.run_record("discovery-mutate", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("changed fixture", report["failure"])
+
+    def test_tool_free_startup_notice_is_narrow_and_recorded(self) -> None:
+        canaries = {"agents": "agent-control", "context-setup": "skill-control"}
+        event = json.dumps({"type": "result", "text": "agent-control skill-control"})
+        notice = "Warning: Unknown toolsets: none\n"
+        events = live.verify_instruction_delivery(notice + event, canaries, "setup")
+        self.assertEqual("startup_notice", events[0]["type"])
+        for raw in (notice.rstrip('\n'), notice + notice + event, "Warning: Unknown toolsets: file\n" + event,
+                    event + "\n" + notice):
+            with self.subTest(raw=raw), self.assertRaises(live.HarnessError):
+                live.verify_instruction_delivery(raw, canaries, "setup")
+
+    def test_tool_free_lifecycle_rejects_memory_and_premature_writes(self) -> None:
+        for mode in ('mutate-native-memory', 'propose-memory', 'premature-apply', 'mutate-start'):
+            with self.subTest(mode=mode):
+                # Each case needs its own immutable baseline and empty proposal store.
+                if mode != 'mutate-native-memory':
+                    self.tearDown()
+                    self.doCleanups()
+                    self.setUp()
+                report = self.run_record(mode, discovery_mode='tool-free')
+                self.assertEqual('failed', report['controls']['run'])
 
     def test_generic_text_fails_canary(self) -> None:
         report = self.run_record("generic")
@@ -633,8 +707,11 @@ class HermesLiveHarnessTest(unittest.TestCase):
 
     def test_environment_names_are_filtered(self) -> None:
         provider_value = "fixture-provider-" + uuid.uuid4().hex
-        with mock.patch.dict(os.environ, {"PRIVATE_UNRELATED": "private", "OPENROUTER_API_KEY": provider_value}):
+        with mock.patch.dict(os.environ, {"PRIVATE_UNRELATED": "private", "OPENROUTER_API_KEY": provider_value,
+                                          "SYSTEMDRIVE": "C:", "WINDIR": "C:/Windows"}):
             env = live.hermes_environment(self.home, "openrouter")
+            self.assertEqual("C:", env["SYSTEMDRIVE"])
+            self.assertEqual("C:/Windows", env["WINDIR"])
             self.assertNotIn("PRIVATE_UNRELATED", env)
             self.assertEqual(provider_value, env["OPENROUTER_API_KEY"])
             self.assertIn("PRIVATE_UNRELATED", live.hermes_environment(self.home, "openrouter", ("PRIVATE_UNRELATED",)))

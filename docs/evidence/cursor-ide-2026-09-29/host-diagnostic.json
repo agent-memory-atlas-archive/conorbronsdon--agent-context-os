@@ -1,0 +1,119 @@
+{
+  "source_sha": "bc4aa5e18857f4fcfa247fbbae23eca649dbf7c6",
+  "version": "3.22.7",
+  "binary_sha256": "62d9a2b6512b07460cc00dd55a250ca9076e96ff9caed4949a9417620a01a7da",
+  "status": "failed",
+  "checks": {
+    "root": true,
+    "nested": true,
+    "rule": true,
+    "explicit": true,
+    "binary_unchanged": true
+  },
+  "mutated_paths": [
+    "approved-write.txt",
+    "denied-write.txt"
+  ],
+  "failure": "implicit skill body was read and UI reported Used contextos-live-explicit, despite final response being the root canary",
+  "notes": [
+    "Nested canary was found by workspace search.",
+    "Rule control ran in Agent mode; remaining discovery controls used Ask.",
+    "Agent file writes were immediate, with only post-edit Keep/Review.",
+    "Explicit slash menu was selected; matching response showed no tool call.",
+    "Short update was observed in menu and never submitted."
+  ],
+  "recorded_at": "2026-09-29T07:56:49.697162+00:00",
+  "implicit_tool_trace": {
+    "surface": "ide",
+    "version": "3.22.7",
+    "source_sha": "bc4aa5e18857f4fcfa247fbbae23eca649dbf7c6",
+    "phase": "implicit",
+    "extraction": "selected tool metadata from the isolated profile; excludes reasoning, content, and account data",
+    "calls": [
+      {
+        "case": "getMcpToolsToolCall",
+        "tool": "get_mcp_tools",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "globToolCall",
+        "tool": "glob_file_search",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "grepToolCall",
+        "tool": "ripgrep_raw_search",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/.context-os-cursor-ide-disposable"
+      },
+      {
+        "case": "globToolCall",
+        "tool": "glob_file_search",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "getMcpToolsToolCall",
+        "tool": "get_mcp_tools",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/nested/control.txt"
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/.agents/skills/update/SKILL.md"
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/.agents/skills/contextos-live-explicit/SKILL.md"
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/AGENTS.md"
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/.cursor/rules/conformance.mdc"
+      },
+      {
+        "case": "globToolCall",
+        "tool": "glob_file_search",
+        "status": "completed",
+        "path": ""
+      },
+      {
+        "case": "readToolCall",
+        "tool": "read_file_v2",
+        "status": "completed",
+        "path": "<fixture>/workspace/nested/AGENTS.md"
+      },
+      {
+        "case": "grepToolCall",
+        "tool": "ripgrep_raw_search",
+        "status": "completed",
+        "path": "<native-transcripts-for-host-fixture>"
+      }
+    ]
+  }
+}

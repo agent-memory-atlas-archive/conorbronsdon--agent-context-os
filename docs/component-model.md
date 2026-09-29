@@ -57,7 +57,7 @@ other repository-root paths extensible or writable.
 | `codex-adapter` | `core`, `portable-skills`, `agents-instructions`, `openai-skill-metadata` | Codex hooks, onboarding, metadata, and descriptor |
 | `hermes-adapter` | `core`, `portable-skills`, `agents-instructions` | Hermes guidance, optional hooks, and descriptor |
 | `openclaw-adapter` | `core`, `portable-skills`, `agents-instructions` | First-class OpenClaw plugin, guidance, descriptor, and conformance |
-| `cursor-adapter` | `core`, `portable-skills`, `agents-instructions` | Experimental Cursor IDE/CLI guidance, descriptor, and conformance |
+| `cursor-adapter` | `core`, `portable-skills`, `agents-instructions` | First-class Cursor CLI and experimental IDE guidance, descriptor, and conformance |
 | `devin-adapter` | `core`, `portable-skills`, `agents-instructions` | Experimental Devin cloud-session/Review guidance and managed-account conformance |
 | `example-project` | `core` | Optional removable example content |
 

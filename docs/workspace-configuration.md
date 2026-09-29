@@ -294,7 +294,7 @@ intent with these rules:
 - only `agent disable` may shrink the configured set;
 - local launch choice is ephemeral and never creates a stored primary agent;
 - no adapter or component is deleted merely because it was not selected; and
-- Cursor is a registered experimental runtime, and OpenClaw is first-class;
+- Cursor CLI and OpenClaw are first-class; Cursor IDE remains experimental;
   both may be stored in `agents`. Cursor registration does not conflate or launch its IDE and Agent
   CLI surfaces; OpenClaw registration does not configure its private workspace,
   copied skills, external plugin, or project aliases. Both retain separate

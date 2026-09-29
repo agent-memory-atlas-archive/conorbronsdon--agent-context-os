@@ -1,0 +1,202 @@
+{
+  "runtime": "cursor",
+  "surface": "cli",
+  "source_sha": "feba424cbb10f495a3b0b8a9e1ff382f1156d1a7",
+  "controls": {
+    "preflight": "passed",
+    "setup_wrong_digest_rejected": "passed",
+    "setup_proposal_apply": "passed",
+    "start_read_only": "passed",
+    "update_wrong_digest_rejected": "passed",
+    "update_proposal_apply": "passed",
+    "update_stale_rejected": "passed",
+    "end_wrong_digest_rejected": "passed",
+    "end_proposal_apply": "passed",
+    "end_stale_rejected": "passed",
+    "handoff": "passed",
+    "run": "passed"
+  },
+  "operator": "external-exact-digest",
+  "os": "Windows-11-10.0.26200-SP0",
+  "model_selection": "Cursor configured default",
+  "started_at": "2026-09-29T06:27:56.848539+00:00",
+  "prompts": {
+    "setup": "/context-setup This is an explicitly authorized synthetic lifecycle fixture. Use the colocated repository. Audience confirmed: synthetic public fixture only. Use identity/lifecycle-fixture.md containing '# Synthetic lifecycle identity\\n\\nThe fixture tests portable continuity.\\n'. For mutations, create exactly one kernel proposal, display its diff and digest, then stop. Do not apply, commit, push, or modify other files. Use .context-os/inputs for payloads. Do not use host-native memory as input.",
+    "start": "/context-start This is an explicitly authorized synthetic lifecycle fixture. Use the colocated repository. Read the continuity inventory and summarize it. Make no changes. For mutations, create exactly one kernel proposal, display its diff and digest, then stop. Do not apply, commit, push, or modify other files. Use .context-os/inputs for payloads. Do not use host-native memory as input.",
+    "update": "/context-update This is an explicitly authorized synthetic lifecycle fixture. Use the colocated repository. Record this fact: The synthetic fixture completed its Cursor setup test. For mutations, create exactly one kernel proposal, display its diff and digest, then stop. Do not apply, commit, push, or modify other files. Use .context-os/inputs for payloads. Do not use host-native memory as input.",
+    "end": "/context-end This is an explicitly authorized synthetic lifecycle fixture. Use the colocated repository. Record this outcome: The synthetic fixture completed its Cursor lifecycle test. Record this exact next action: The synthetic fixture must verify continuity using 62537ce95f9dd2ea20312fed966c5941. For mutations, create exactly one kernel proposal, display its diff and digest, then stop. Do not apply, commit, push, or modify other files. Use .context-os/inputs for payloads. Do not use host-native memory as input.",
+    "handoff": "/context-start Read the saved session and report the exact next action for the synthetic fixture, including its verification value."
+  },
+  "phases": {
+    "setup": {
+      "proposal_digest": "f3d63f2ef24abb48896fc509f525a0c69a36b7d4d1ee855bbf48431857799d60",
+      "proposal_sha256": "05172ff6fbe420e4d6eb7a7cb0131bd2e252c3bf9488ae7b701c11d069e7179e",
+      "receipt": ".context-os/receipts/20260928T232924-setup-d8a68c213b.json",
+      "receipt_sha256": "8c0b612108e9395d5a60d58803c996c329e8b4c8d25d703a2261943af8d0cfc5",
+      "receipt_proposal_digest": "f3d63f2ef24abb48896fc509f525a0c69a36b7d4d1ee855bbf48431857799d60",
+      "receipt_runtime": "cursor",
+      "applied_files": {
+        "identity/lifecycle-fixture.md": "54b082cea81782da6e022cb3ebd2ce88ee63cf196eb61a0b79a70c02cddda264"
+      }
+    },
+    "update": {
+      "proposal_digest": "066bbd73f17f1a3397492cb7c92d69895b81add469d56c58614129f6976e9cde",
+      "proposal_sha256": "53d8b4d9ddd0088a4225761eb7f15040fe9969629ae27d1f973dbfb220731d90",
+      "receipt": ".context-os/receipts/20260928T233242-update-93c116d862.json",
+      "receipt_sha256": "067cf37bc1a6c1d9654abef44e41a8416746b88b2ed43d153aaf8094f5427e15",
+      "receipt_proposal_digest": "066bbd73f17f1a3397492cb7c92d69895b81add469d56c58614129f6976e9cde",
+      "receipt_runtime": "cursor",
+      "applied_files": {
+        "sessions/2026-09-28.md": "da61b3d4aa476a23f1b97d9c65f69f6bb2890faed039ba7a152c310273b874c2"
+      }
+    },
+    "end": {
+      "proposal_digest": "d1487f30b9a7a47be536a0ae0067fb3ecab334ffb74c93e596e7c2077ac20443",
+      "proposal_sha256": "8b8add58d91cb41c4df3967948cbe14b0bd1a3d78241d15ff9cdc7eaf97c1fdf",
+      "receipt": ".context-os/receipts/20260928T233433-end-b5736852f1.json",
+      "receipt_sha256": "bede47fb86fc7cfd412726569f92c6f581dc7877aaaebf3a1faab5478649a78f",
+      "receipt_proposal_digest": "d1487f30b9a7a47be536a0ae0067fb3ecab334ffb74c93e596e7c2077ac20443",
+      "receipt_runtime": "cursor",
+      "applied_files": {
+        "sessions/2026-09-28.md": "19a3d960baefe25eef6ab309a03e22fbed6e4d1433542c40e815a12cf82e286c"
+      }
+    }
+  },
+  "kernel_commands": [
+    {
+      "command": "python.exe",
+      "argv_sha256": "e1fec87cc7056e52ea05fa723eb0d66c7efc4526d1b8333244525619639b71fe",
+      "returncode": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "92037989f1e595e88fef65444ea149186058c1a40e5c1d1eb0cbeb8b1a6981fc"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "79d94ce90fd26ad1faeaa2bfffa3d8ce59fc302e8651bc66fff334c84e37f1fd",
+      "returncode": 0,
+      "stdout_sha256": "ec7177065cc925a5ce91d866e44ae4e6b2ccf669d31aaf5c93d3063526a99c61",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "4f952719171f454b057dd9041f4ebb2b3cc36785719d7ba0a91ece855b277a2d",
+      "returncode": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "92037989f1e595e88fef65444ea149186058c1a40e5c1d1eb0cbeb8b1a6981fc"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "dfb4bef1893a3682f5205141fc9a9db2937fb0c6ece2970aae49e168f55df664",
+      "returncode": 0,
+      "stdout_sha256": "b5b304972b6ed8d93e58aa45a70dedcfa3d524e0cf8106c4e40118257ded0b58",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "dfb4bef1893a3682f5205141fc9a9db2937fb0c6ece2970aae49e168f55df664",
+      "returncode": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "811abf9df9ae80201caf61cefac3ff422371ba659613fec8f5292486a3d9a4aa"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "9085835d515c1a7dec38af00391d4182d0d5568b06762c64cf7e5e7d7c212d9b",
+      "returncode": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "92037989f1e595e88fef65444ea149186058c1a40e5c1d1eb0cbeb8b1a6981fc"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "5c76bc510a38605496591554863b223aebe03aa6d04b7b1e665ce9902a38fe0b",
+      "returncode": 0,
+      "stdout_sha256": "74ae97b838e2a4eb8383237017c87073eebe9dd4d6e0678f3315758504151acb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "python.exe",
+      "argv_sha256": "5c76bc510a38605496591554863b223aebe03aa6d04b7b1e665ce9902a38fe0b",
+      "returncode": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "811abf9df9ae80201caf61cefac3ff422371ba659613fec8f5292486a3d9a4aa"
+    }
+  ],
+  "limits": [
+    "No IDE, hook, MCP execution, or native-memory claim.",
+    "Scoped to the recorded client, model selection, and operating system."
+  ],
+  "handoff_value_recovered": true,
+  "handoff_read_only": true,
+  "handoff_answer_sha256": "dc0c10c986ad4e82b7f22b76d35b4ff11910678db76f2f87f95516058450e1f8",
+  "host": {
+    "expected_version": "2026.09.28-64d2043",
+    "source_sha": "feba424cbb10f495a3b0b8a9e1ff382f1156d1a7",
+    "binary_version": "2026.09.28-64d2043",
+    "binary_name": "agent.cmd",
+    "binary_sha256": "299eaddf3327768e7fcd64f29ad01747c740f7e316931575fb3cee617c92ccfc",
+    "workspace_cleanup": "completed",
+    "commands": [
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "c8c459b021d9cd0a5e9671f0609ee0f631ba2e34a7dac404abbf08b8cb37a326",
+        "returncode": 0,
+        "stdout_sha256": "cd435d4f8034a16a4fafc1a5cb7f24d248455352c37717697a0475bf371bbdd4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "80c5f326e40ab6b4716400249cdaeaee756cf8dd209f548f0a3a3c71ef65b58c",
+        "returncode": 0,
+        "stdout_sha256": "2b173a18098fdeca23d4084b5d29af4e19e974eaa541906ae0d03b6a5df70b3a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "abd1298b805e913743acd7d835e8f593b10e8ef6638a394ac4ff90b5d3e7d68d",
+        "returncode": 0,
+        "stdout_sha256": "597220d5e2f8d15dbb9ed65208e5c3211855aa0b8460f03d94766e37422a3859",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "822cf10ce45514f5bbc8445f1222aad6befaf0bc75ac84090eb4e298f116aca4",
+        "returncode": 0,
+        "stdout_sha256": "dbe71f4fa4749359a1fa19c4fc64f0de51c20a72b5170d87140e0220fad33f59",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "be6b80d2d9862b305ae175acfdf6aa818458afb99a54ae8cfe95ac9c5fc54d13",
+        "returncode": 0,
+        "stdout_sha256": "4b57773ab07f94ddd5ccbf7c23b486bcbe3365eec41dd5d741292b9f3ec91954",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "21532234638ce562caa22f261ccb41b40697e71e9a99a0390e3328e4c02feb70",
+        "returncode": 0,
+        "stdout_sha256": "8fa5d46d8b4fbbd225cb477fc3bc825fd6715c5edfd1ef87ac6f79aaaa39e46c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "c914ef4296110ec200a0bb07b6136365093d3e1aa39a23ee2e3c6287ccd43475",
+        "returncode": 0,
+        "stdout_sha256": "b7feab27f93a26412b8f97ee8fc4fcc37eeedee0ca3cd7ca3a12c877d4115f51",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "876e657c76cf146b6577e32a16408cc31357cfe02a66b26ca12b6cbe915a79a2",
+        "returncode": 0,
+        "stdout_sha256": "74b70c1baf227a4ff53962e353c19f69dbd3b8eb7b1838a6746e755fcd899ac7",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "controls": {
+      "exact_version": true,
+      "required_flags": true,
+      "authenticated": true
+    }
+  },
+  "finished_at": "2026-09-29T06:35:58.661216+00:00"
+}

@@ -20,6 +20,7 @@ These add-ons are **references, not bundled dependencies**. Setup does not insta
 | [Notion MCP](https://developers.notion.com/guides/mcp/get-started-with-mcp) | `mcp_server` | verified | Yes | Yes | No | Yes | Yes | 2026-08-15 |
 | [Obsidian CLI](https://obsidian.md/help/cli) | `editor_guide` | verified | Yes | Yes | Yes | Yes | Yes | 2026-08-15 |
 | [Pandoc](https://github.com/jgm/pandoc) | `connector` | verified | Yes | No | No | Yes | Yes | 2026-08-25 |
+| [Pi Dash](https://github.com/The-AI-Republic/pi-dash) | `agent_extension` | experimental | Yes | Yes | Yes | Yes | Yes | 2026-09-29 |
 | [Readwise MCP](https://docs.readwise.io/tools/mcp) | `mcp_server` | verified | Yes | Yes | No | Yes | Yes | 2026-08-18 |
 | [Shortcut MCP](https://www.shortcut.com/help/integrations/mcp-server/) | `mcp_server` | verified | Yes | Yes | No | Yes | Yes | 2026-08-30 |
 | [Slack MCP](https://docs.slack.dev/ai/slack-mcp-server/) | `mcp_server` | verified | Yes | Yes | Yes | Yes | Yes | 2026-09-02 |
@@ -408,6 +409,32 @@ Capabilities and limits:
 - --sandbox limits reader and writer IO to files named on the command line, but does not constrain filters or PDF production and can prevent formats such as DOCX from loading filesystem data files
 - PDF output invokes a separately installed engine; audit and confirm the exact --pdf-engine and every --pdf-engine-opt because the engine can widen filesystem, network, and execution risk
 - Pandoc's full flag surface can enable arbitrary execution and additional side effects through filters, custom writers, and PDF engines
+
+## Pi Dash
+
+An optional task orchestration platform and local agent runner; Context OS lifecycle approval through its runner remains unverified.
+
+- **Supported agents:** `claude_code`, `codex`, `cursor`
+- **Install scope:** `user`; never automatic
+- **Prerequisites:** A separately selected Pi Dash instance and project; A supported agent CLI with its own authentication; An explicitly selected disposable workspace for initial verification
+- **Credentials:** Pi Dash CLI token and runner credentials stored outside repository files; The selected agent's credentials and any repository credentials available to its process
+- **Reads:** Assigned task text and selected workspace files, potentially including private context; Agent output and operational logs reported to the selected Pi Dash instance
+- **Writes / external effects:** Local runner configuration, background service or scheduled task, and selected workspace files; Remote task activity and run results sent to the selected platform; Agent-directed shell commands can overwrite or delete files and publish through available external credentials
+- **Typed safety signals:** sensitive read, remote write, overwrite, delete, arbitrary execution
+- **Required confirmation gates:** `external_install`, `credential_setup`, `read_sensitive`, `write`, `write_remote`, `publish`, `overwrite`, `delete`, `arbitrary_execution`, `destructive`
+- **Confirmation:** Approve the platform destination, workspace, credentials, persistent service, agent installation, update policy, and external writes separately. Do not grant unattended lifecycle apply authority. Verify an actual denied-action control and exact-digest operator handoff before using the runner with durable context.
+- **Risk tags:** `external-install`, `credentials`, `sensitive-read`, `remote-write`, `publish-capable`, `overwrite-capable`, `delete-capable`, `arbitrary-execution`, `destructive-capable`, `background-service`, `automatic-updates`, `unverified-approval-boundary`
+- **Evidence:** [1](https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/README.md); [2](https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/src/agent/mod.rs); [3](https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/src/cursor_agent/bridge.rs)
+- **Health check:** Before any live adoption, inspect the pinned runner and selected bridge, then test a synthetic workspace for instruction discovery, explicit skills, denied writes, proposal-only behavior, cancellation, and repository-backed handoff. A successful pidash doctor checks prerequisites, not lifecycle authorization. No live Pi Dash test has been performed for this entry.
+- **Uninstall:** Stop the owned runner, remove its registration and installed service using the selected version's documented commands, and revoke its credentials. Preserve workspace changes and required run evidence first; inspect configuration and cloud retention separately before deleting either. (removes user data: Yes)
+
+Capabilities and limits:
+
+- Source inspection at 07bb896a4dd0759f6a93fa72f6a6e8f8581e7791 found Claude Code, Codex, and Cursor bridges; this is not installed-client conformance or inherited Context OS support
+- The pinned Cursor bridge uses print-mode stream JSON with --force enabled and rejects approval forwarding as unwired; it does not provide the operator gate required for Context OS apply
+- Runner registration can install and start a background service, invoke a missing agent's installer, and enable automatic runner updates; review these separately before registration
+- Use the existing host adapter for repository instructions and explicit lifecycle skills; no native-memory import, account synchronization, or new runtime descriptor is supplied
+- Keep setup, update, and end at proposal generation until an operator reviews the exact diff and applies its digest outside the unattended runner; textual instructions alone do not enforce that boundary
 
 ## Readwise MCP
 

@@ -1,0 +1,77 @@
+{
+  "id": "pi-dash",
+  "name": "Pi Dash",
+  "summary": "An optional task orchestration platform and local agent runner; Context OS lifecycle approval through its runner remains unverified.",
+  "source_url": "https://github.com/The-AI-Republic/pi-dash",
+  "kind": "agent_extension",
+  "supported_agents": ["claude_code", "codex", "cursor"],
+  "installation": {
+    "automatic": false,
+    "scope": "user",
+    "prerequisites": [
+      "A separately selected Pi Dash instance and project",
+      "A supported agent CLI with its own authentication",
+      "An explicitly selected disposable workspace for initial verification"
+    ]
+  },
+  "data_boundary": {
+    "credentials": [
+      "Pi Dash CLI token and runner credentials stored outside repository files",
+      "The selected agent's credentials and any repository credentials available to its process"
+    ],
+    "reads": [
+      "Assigned task text and selected workspace files, potentially including private context",
+      "Agent output and operational logs reported to the selected Pi Dash instance"
+    ],
+    "writes": [
+      "Local runner configuration, background service or scheduled task, and selected workspace files",
+      "Remote task activity and run results sent to the selected platform",
+      "Agent-directed shell commands can overwrite or delete files and publish through available external credentials"
+    ]
+  },
+  "capabilities": {
+    "read": true,
+    "sensitive_read": true,
+    "write": true,
+    "remote_write": true,
+    "publish": true,
+    "overwrite": true,
+    "delete": true,
+    "arbitrary_execution": true,
+    "oauth": false,
+    "destructive": true,
+    "details": [
+      "Source inspection at 07bb896a4dd0759f6a93fa72f6a6e8f8581e7791 found Claude Code, Codex, and Cursor bridges; this is not installed-client conformance or inherited Context OS support",
+      "The pinned Cursor bridge uses print-mode stream JSON with --force enabled and rejects approval forwarding as unwired; it does not provide the operator gate required for Context OS apply",
+      "Runner registration can install and start a background service, invoke a missing agent's installer, and enable automatic runner updates; review these separately before registration",
+      "Use the existing host adapter for repository instructions and explicit lifecycle skills; no native-memory import, account synchronization, or new runtime descriptor is supplied",
+      "Keep setup, update, and end at proposal generation until an operator reviews the exact diff and applies its digest outside the unattended runner; textual instructions alone do not enforce that boundary"
+    ]
+  },
+  "confirmation": {
+    "required_for": [
+      "external_install", "credential_setup", "read_sensitive", "write",
+      "write_remote", "publish", "overwrite", "delete", "arbitrary_execution",
+      "destructive"
+    ],
+    "notes": "Approve the platform destination, workspace, credentials, persistent service, agent installation, update policy, and external writes separately. Do not grant unattended lifecycle apply authority. Verify an actual denied-action control and exact-digest operator handoff before using the runner with durable context."
+  },
+  "risk_tags": [
+    "external-install", "credentials", "sensitive-read", "remote-write",
+    "publish-capable", "overwrite-capable", "delete-capable",
+    "arbitrary-execution", "destructive-capable", "background-service",
+    "automatic-updates", "unverified-approval-boundary"
+  ],
+  "maturity": "experimental",
+  "last_verified": "2026-09-29",
+  "evidence": [
+    "https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/README.md",
+    "https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/src/agent/mod.rs",
+    "https://github.com/The-AI-Republic/pi-dash/blob/07bb896a4dd0759f6a93fa72f6a6e8f8581e7791/runner/src/cursor_agent/bridge.rs"
+  ],
+  "health_check": "Before any live adoption, inspect the pinned runner and selected bridge, then test a synthetic workspace for instruction discovery, explicit skills, denied writes, proposal-only behavior, cancellation, and repository-backed handoff. A successful pidash doctor checks prerequisites, not lifecycle authorization. No live Pi Dash test has been performed for this entry.",
+  "uninstall": {
+    "instructions": "Stop the owned runner, remove its registration and installed service using the selected version's documented commands, and revoke its credentials. Preserve workspace changes and required run evidence first; inspect configuration and cloud retention separately before deleting either.",
+    "removes_user_data": true
+  }
+}

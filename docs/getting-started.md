@@ -7,7 +7,7 @@ its lifecycle kernel and host adapters; existing workspaces keep using this path
 
 Context OS can begin with a blank interview or selected context from another
 assistant. The result is a small, reviewable repository that Claude Code,
-Codex, OpenClaw, and OpenCode, plus the experimental Hermes, Cursor, and Devin adapters,
+Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent, plus the experimental Cursor IDE and Devin adapters,
 can use as shared state.
 
 For one guided example before importing your own context, try
@@ -17,7 +17,7 @@ For one guided example before importing your own context, try
 ## Before you clone
 
 You need Git, Bash, and Python 3.10 or newer. Local hosts include Claude Code,
-Codex, OpenClaw, OpenCode, and the experimental Hermes and Cursor adapters; verify Devin's
+Codex, OpenClaw, OpenCode, Cursor CLI, Hermes Agent, and the experimental Cursor IDE adapter; verify Devin's
 managed cloud path separately in its account UI. claude.ai cannot maintain a
 local checkout directly.
 
@@ -142,7 +142,7 @@ proposal file and apply it with the documented trusted-shell kernel command;
 the plugin does not expose proposal application.
 
 Cursor has separate IDE and Agent CLI permission surfaces. Follow its
-[experimental adapter guide](../adapters/cursor/README.md); setup registers the
+[CLI and experimental IDE guide](../adapters/cursor/README.md); setup registers the
 runtime but launches neither surface and changes no Cursor authorization setting.
 
 For Devin, follow the [experimental managed-account guide](../adapters/devin/README.md),
@@ -189,7 +189,7 @@ Commit and push only after the diff matches what you intend to preserve.
 
 ## Run the daily loop
 
-| Moment | Claude Code | Codex | OpenCode | Hermes | OpenClaw | Cursor IDE/CLI (experimental) | Devin session (experimental) |
+| Moment | Claude Code | Codex | OpenCode | Hermes | OpenClaw | Cursor CLI / IDE (experimental) | Devin session (experimental) |
 |---|---|---|---|---|---|---|---|
 | Start work | `/start` | `$start` | `/context-start` | `/context-start` | `/contextos <alias> start` | `/context-start` | `@skills:context-start` |
 | Save progress without closing | `/update` | `$update` | `/context-update` | `/context-update` | `/contextos <alias> update` | `/context-update` | `@skills:context-update` |

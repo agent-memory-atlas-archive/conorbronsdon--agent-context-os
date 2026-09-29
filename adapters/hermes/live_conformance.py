@@ -137,6 +137,48 @@ def prompt_for(phase: str) -> str:
     return prompt + " Also report the fixture canary values stated in the repository instructions and the skill instructions you loaded."
 
 
+def discovery_prompt() -> str:
+    return ("Report only the fixture canary values already supplied in the repository "
+            "instructions and the preloaded skill instructions. Do not execute the "
+            "workflow. No tools are available for this instruction-delivery control.")
+
+
+def lifecycle_prompt_for(phase: str) -> str:
+    """Supply the reviewed synthetic input a user would provide to each skill."""
+    detail = {
+        "setup": ("Audience confirmed: synthetic public fixture only. Create a kernel setup proposal "
+                  "for identity/hermes-fixture.md containing '# Synthetic fixture identity\\n\\n"
+                  "The fixture tests portable continuity.\\n'."),
+        "start": "Run the read-only start inventory and summarize the saved fixture context.",
+        "update": "Create a kernel update proposal recording: The synthetic fixture completed its Hermes setup test.",
+        "end": ("Create a kernel end proposal recording: The synthetic fixture completed its Hermes lifecycle test. "
+                "Next action: The synthetic fixture should verify continuity in a new session."),
+    }[phase]
+    return (detail + " Use this colocated repository and the preloaded lifecycle skill. "
+            "For mutations, write payloads only under .context-os/inputs, create exactly one proposal, "
+            "display its diff and digest, and stop before apply. Do not commit, push, delegate, "
+            "or use native memory as proposal input.")
+
+
+def verify_instruction_delivery(raw: str, canaries: dict[str, str], phase: str) -> list[dict]:
+    """A separate tool-free turn proves delivery; lifecycle reads cannot prove it."""
+    # v0.21.5 resolves the unknown name to an empty tool selection but its CLI
+    # prints this exact startup warning even in -Q stream-json mode. Recognize
+    # only one leading line; do not discard arbitrary non-JSON diagnostics.
+    notice = "Warning: Unknown toolsets: none"
+    notices = []
+    if raw.splitlines()[:1] == [notice]:
+        raw = raw.partition("\n")[2]
+        notices = [{"type": "startup_notice", "text": notice}]
+    events, assistant, _, self_read = stream_evidence(raw, canaries, phase)
+    if self_read or any(event.get("type") in {"tool_use", "tool_result"} for event in events):
+        raise HarnessError("tool-free discovery emitted a tool event")
+    missing = [name for name in ("agents", f"context-{phase}") if canaries[name] not in assistant]
+    if missing:
+        raise HarnessError(f"canary not reported: {', '.join(missing)}")
+    return notices + events
+
+
 def stream_evidence(output: str, known: Sequence[str] | dict[str, str],
                     phase: str | None = None) -> tuple[list[dict], str, list[str], bool]:
     markers = tuple(known.values()) if isinstance(known, dict) else tuple(known)
@@ -447,6 +489,7 @@ def prepare(source: Path, fixture: Path, home: Path, expected_commit: str,
     cloned = command(["git", "clone", "--local", "--no-hardlinks", "--quiet", str(source), str(fixture)], source)
     if cloned["exit_code"] or git(fixture, "rev-parse", "HEAD") != expected_commit:
         raise HarnessError("could not clone the exact clean source commit")
+    git(fixture, "remote", "remove", "origin")
     (fixture / MARKER).write_text("disposable\n", encoding="utf-8")
     (fixture / "unrelated-sentinel.txt").write_bytes(secrets.token_bytes(64))
     canaries = {"agents": secrets.token_hex(16)}
@@ -467,8 +510,9 @@ def prepare(source: Path, fixture: Path, home: Path, expected_commit: str,
                 "native_memory_canaries": memory_canaries,
                 "sentinel_sha256": sha(fixture / "unrelated-sentinel.txt"),
                 "prompts": {phase: prompt_for(phase) for phase in PHASES},
-                "commands": ["python adapters/hermes/live_conformance.py record --fixture <fixture> --home <home> --manifest <manifest> --evidence <new-json> --binary <hermes> --model <model> --provider <provider> --expected-version 'Hermes Agent v0.21.4' --run-budget 120 --max-turns 20"],
+                "commands": ["python adapters/hermes/live_conformance.py record --fixture <fixture> --home <home> --manifest <manifest> --evidence <new-json> --binary <hermes> --model <model> --provider <provider> --expected-version 'Hermes Agent v0.21.5' --run-budget 300 --max-turns 40"],
                 "steps": ["Set HERMES_HOME to the fresh home path printed by prepare.",
+                          "Set auth.adopt_external_logins: false in the fresh home config.yaml before record.",
                           "Supply provider credentials through environment variables; do not copy credentials into the fixture.",
                           "Record trusts the fixture in the disposable HERMES_HOME before the first phase.",
                           "Run record with --binary, --model, --provider, --run-budget, --max-turns and --evidence.",
@@ -540,7 +584,7 @@ def mirrors_memory(text: str, canaries: Sequence[str]) -> bool:
 
 
 def hermes_environment(home: Path, provider: str, allow: Sequence[str] = ()) -> dict[str, str]:
-    base = {"PATH", "SYSTEMROOT", "HOME", "USERPROFILE", "TEMP", "TMP", "APPDATA", "LOCALAPPDATA",
+    base = {"PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "HOME", "USERPROFILE", "TEMP", "TMP", "APPDATA", "LOCALAPPDATA",
             "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "SSL_CERT_FILE", "SSL_CERT_DIR",
             "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"}
     names = base | {name.upper() for name in allow}
@@ -597,7 +641,10 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
            provider: str, run_budget: int, max_turns: int, input_fn=input,
            expected_version: str = "", approval_dir: Path | None = None,
            approval_timeout: float = 900, manifest_path: Path | None = None,
-           env_allow: Sequence[str] = (), no_key_check: bool = False) -> dict:
+           env_allow: Sequence[str] = (), no_key_check: bool = False,
+           discovery_mode: str = "tool-free") -> dict:
+    if discovery_mode not in {"tool-free", "combined"}:
+        raise HarnessError("unknown discovery mode")
     fixture, home, evidence = fixture.resolve(), home.resolve(), evidence.resolve(strict=False)
     if not home.is_dir() or fixture in home.parents or home in fixture.parents:
         raise HarnessError("HERMES_HOME must be a separate existing directory")
@@ -634,6 +681,7 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
         if marker not in (home / "memories" / name).read_text(encoding="utf-8"):
             raise HarnessError("synthetic native memory canary is missing")
     result = {"started_at": now(), "source_sha": manifest["source_sha"], "fixture_commit": manifest["fixture_commit"],
+              "discovery_mode": discovery_mode,
               "os": platform.platform(), "fresh_hermes_home": True,
               "operator_mode": "approval-dir" if approval_dir is not None else "interactive",
               "model": route_id(model, "model"), "provider": route_id(provider, "provider"),
@@ -701,10 +749,34 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
                                          for name, marker in manifest["native_memory_canaries"].items()}}
         for phase in PHASES:
             current_control = f"{phase}_discovery"
+            if discovery_mode == "tool-free":
+                discovery_before = tracked_state(fixture)
+                discovery_argv = [*binary, "chat", "-Q", "--format", "stream-json", "--source", "tool",
+                                  "-m", model, "--provider", provider, "--run-budget", str(run_budget),
+                                  "--max-turns", "1", "-t", "none", "-s", f"context-{phase}",
+                                  "-q", discovery_prompt()]
+                delivery = command(discovery_argv, fixture, env, timeout=run_budget + 30, raw_output=True)
+                delivery_raw = delivery.pop("_raw_stdout")
+                delivery.pop("_raw_stderr")
+                delivery["stdout"] = "[stream-json events recorded separately]"
+                result["commands"].append(delivery)
+                if delivery["exit_code"]:
+                    raise HarnessError(f"{phase} instruction delivery failed or timed out")
+                delivery["events"] = verify_instruction_delivery(delivery_raw, stream_canaries, phase)
+                if tracked_state(fixture) != discovery_before:
+                    raise HarnessError("tool-free discovery changed fixture files")
+                check_native_memory(home, memory_before, memory_contents, result,
+                                    tuple(manifest["native_memory_canaries"].values()))
+                result["controls"][current_control] = "passed"
+                if phase == "setup":
+                    result["controls"]["agents_discovery"] = "passed"
+                current_control = f"{phase}_lifecycle"
             before = tracked_state(fixture, include_kernel=phase == "start")
             proposals = set((fixture / ".context-os" / "proposals").glob("*.json"))
             prompt = prompt_for(phase)
-            argv = [*binary, "chat", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
+            if discovery_mode == "tool-free":
+                prompt = lifecycle_prompt_for(phase)
+            argv = [*binary, "chat", "-Q", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
                     "--run-budget", str(run_budget), "--max-turns", str(max_turns), "-s", f"context-{phase}", "-q", prompt]
             call = command(argv, fixture, env, timeout=run_budget + 30, raw_output=True)
             raw = call.pop("_raw_stdout")
@@ -714,22 +786,22 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
             current_control = "memory_separation"
             check_native_memory(home, memory_before, memory_contents, result,
                                 tuple(manifest["native_memory_canaries"].values()))
-            current_control = f"{phase}_discovery"
+            current_control = f"{phase}_lifecycle" if discovery_mode == "tool-free" else f"{phase}_discovery"
             if call["exit_code"]:
                 raise HarnessError(f"{phase} chat failed or timed out")
             events, assistant, skills, self_read = stream_evidence(raw, stream_canaries, phase)
             call["events"] = events
             call["skill_view_names"] = skills
-            required = [canaries["agents"], canaries[f"context-{phase}"]]
-            if self_read:
-                raise HarnessError("self-read: discovery not shown")
-            missing = [name for name, value in (("agents", canaries["agents"]), (f"context-{phase}", canaries[f"context-{phase}"]))
-                       if value not in assistant]
-            if missing:
-                raise HarnessError(f"canary not reported: {', '.join(missing)}")
-            result["controls"][f"{phase}_discovery"] = "passed"
-            if phase == "setup":
-                result["controls"]["agents_discovery"] = "passed"
+            call["instruction_self_read"] = self_read
+            if discovery_mode == "combined":
+                if self_read:
+                    raise HarnessError("self-read: discovery not shown")
+                missing = [name for name in ("agents", f"context-{phase}") if canaries[name] not in assistant]
+                if missing:
+                    raise HarnessError(f"canary not reported: {', '.join(missing)}")
+                result["controls"][f"{phase}_discovery"] = "passed"
+                if phase == "setup":
+                    result["controls"]["agents_discovery"] = "passed"
             current_control = "memory_separation"
             check_memory(fixture, home, manifest["native_memory_canaries"])
             check_native_memory(home, memory_before, memory_contents, result,
@@ -822,6 +894,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--run-budget", type=int, default=120)
     run.add_argument("--max-turns", type=int, default=20)
     run.add_argument("--approval-dir")
+    run.add_argument("--discovery-mode", choices=("tool-free", "combined"), default="tool-free")
     args = parser.parse_args(argv)
     try:
         if args.action == "prepare":
@@ -834,7 +907,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                             expected_version=args.expected_version,
                             approval_dir=Path(args.approval_dir) if args.approval_dir else None,
                             manifest_path=Path(args.manifest), env_allow=args.env_allow,
-                            no_key_check=args.no_key_check)
+                            no_key_check=args.no_key_check, discovery_mode=args.discovery_mode)
             print(json.dumps({"controls": result["controls"], "evidence": args.evidence}, indent=2))
             return 0 if result["controls"]["run"] == "passed" else 1
     except HarnessError as exc:

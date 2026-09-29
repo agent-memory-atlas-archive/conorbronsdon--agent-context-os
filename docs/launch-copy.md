@@ -1,8 +1,51 @@
 # Context OS launch copy
 
-Drafts only. Review links, release status, and platform length before publishing.
+Drafts only. Use the [current support table](../README.md#host-support) for branch
+tiers and the selected release's notes for shipped support. Review links,
+release status, and platform length before publishing.
 
-## Main announcement
+## v0.15.0 announcement draft
+
+Unpublished. Replace the release link and verify every host claim against the
+published release before using this copy. Earlier v0.13 drafts below are retained
+as historical material.
+
+I built Context OS to keep useful project context between coding-agent sessions.
+Decisions, current work, and reviewed handoffs live in a Git-backed repository,
+so the next agent can inspect what changed and where it came from.
+
+The context repository can stay separate from the application you're building.
+Setup, checkpoints, and close requests produce a diff to review before applying
+the exact proposal. The application contributes read-only Git evidence to that
+lifecycle; host-native memory stays with its host.
+
+Version 0.15.0 adds first-class Cursor CLI and Hermes Agent support
+alongside Claude Code, Codex, OpenClaw, and OpenCode. Cursor IDE and Devin remain
+experimental. These are scoped support claims: connecting an agent through an
+app or ACP does not inherit the CLI's lifecycle evidence.
+
+Start with the first-handoff exercise, or use the experimental three-file starter
+for one project. Both ask you to review what the next session will carry forward.
+No human onboarding-time or productivity improvement is claimed.
+
+[First handoff](first-handoff.md) · [Starter](minimal-starter.md) ·
+[Repository](https://github.com/conorbronsdon/agent-context-os)
+
+### Short version
+
+Context OS keeps project decisions and handoffs in files you can review, version,
+and carry between supported coding agents. Version 0.15.0 adds Cursor
+CLI and Hermes support; desktop Cursor and Devin remain experimental. Start with
+one reviewed handoff: https://github.com/conorbronsdon/agent-context-os
+
+### Contributor invitation
+
+Try the first-handoff guide with synthetic or public context and note where you
+get stuck. We also welcome reproducible adapter findings: include the host
+version, the command or skill you invoked, what happened, and what you expected.
+Keep credentials and private session histories out of issues.
+
+## Historical v0.13 main announcement
 
 I built `agent-context-os` because I was tired of rebuilding the same context across chats, projects, and coding agents.
 

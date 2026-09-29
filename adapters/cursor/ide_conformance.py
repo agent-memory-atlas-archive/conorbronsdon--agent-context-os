@@ -24,6 +24,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 DISPOSABLE_MARKER = ".context-os-cursor-ide-disposable"
 APPROVED_FILE = "approved-write.txt"
 APPROVED_CONTENT = "CONTEXTOS_CURSOR_IDE_APPROVED_WRITE"
+DENIED_CONTENT = "DENIED_WRITE_CONTROL"
 ABSENT_WRITE_FILES = ("ask-write.txt", "denied-write.txt")
 SHORT_UPDATE_RESULTS = {"builtin", "skill", "ambiguous", "unavailable"}
 
@@ -244,6 +245,14 @@ def record(args: argparse.Namespace) -> None:
     evidence_path = require_outside_source(args.evidence, "evidence")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     observations = json.loads(args.observations.read_text(encoding="utf-8"))
+    characterize = getattr(args, "characterize_file_writes", False)
+    observed_behavior = observations.get("agent_write_behavior")
+    write_behavior = observed_behavior if characterize else "approval-required"
+    if characterize and (not isinstance(write_behavior, str) or
+                         write_behavior not in {"immediate", "approval-required"}):
+        raise HarnessError("write characterization requires an explicit observed agent_write_behavior")
+    if not characterize and "agent_write_behavior" in observations and observed_behavior != "approval-required":
+        raise HarnessError("strict recording requires approval-required agent_write_behavior")
     if manifest.get("schema_version") != 1 or manifest.get("surface") != "ide":
         raise HarnessError("unsupported IDE manifest")
     actual_sha = repository_source_sha()
@@ -281,10 +290,22 @@ def record(args: argparse.Namespace) -> None:
     short_update = require_text(observations, "short_update_resolution")
     if short_update not in SHORT_UPDATE_RESULTS:
         raise HarnessError("short_update_resolution is not a supported observation")
-    for name in ("ask_write_denied", "agent_write_denied", "agent_write_approved", "short_update_not_executed"):
+    required_attestations = [
+        "ask_write_denied", "short_update_not_executed", "implicit_skill_body_not_loaded",
+    ]
+    if characterize:
+        required_attestations.append("file_write_control_observed")
+    if write_behavior == "approval-required":
+        required_attestations.extend(("agent_write_denied", "agent_write_approved"))
+    for name in required_attestations:
         if observations.get(name) is not True:
             raise HarnessError(f"operator control {name!r} was not affirmed")
     for relative in ABSENT_WRITE_FILES:
+        if characterize and write_behavior == "immediate" and relative == "denied-write.txt":
+            observed = workspace / relative
+            if not observed.is_file() or observed.read_text(encoding="utf-8").strip() != DENIED_CONTENT:
+                raise HarnessError("immediate-write observation lacks the exact observed file")
+            continue
         if (workspace / relative).exists():
             raise HarnessError(f"denied control wrote {relative}")
     approved = workspace / APPROVED_FILE
@@ -293,13 +314,16 @@ def record(args: argparse.Namespace) -> None:
     baseline = dict(manifest["baseline"])
     current = snapshot(workspace)
     mutations = {name for name in set(baseline) | set(current) if baseline.get(name) != current.get(name)}
-    if mutations != {APPROVED_FILE}:
+    expected_mutations = {APPROVED_FILE}
+    if characterize and write_behavior == "immediate":
+        expected_mutations.add("denied-write.txt")
+    if mutations != expected_mutations:
         raise HarnessError(f"IDE changed unexpected fixture paths: {sorted(mutations)}")
 
     conflict_winner = "agents" if conflict == canaries["conflict_root"] else "project_rule"
     if repository_source_sha() != actual_sha:
         raise HarnessError("source commit changed during Cursor IDE evidence recording")
-    write_create_only(evidence_path, {
+    evidence = {
         "schema_version": 1,
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "runtime": "cursor",
@@ -326,6 +350,7 @@ def record(args: argparse.Namespace) -> None:
             "project_rule_discovery": True,
             "instruction_rule_conflict_characterized": True,
             "implicit_skill_must_not_fire": True,
+            "implicit_skill_body_not_loaded": True,
             "ask_mode_preserves_files": True,
             "interactive_denial_preserves_files": True,
             "interactive_approval_is_scoped": True,
@@ -334,7 +359,22 @@ def record(args: argparse.Namespace) -> None:
         "unverified_controls": {
             "explicit_skill_must_fire": "IDE control cannot exclude a direct read of the skill file"
         },
-    })
+        "limits": ["Tool-trace inspection is operator-attested; the recorder does not parse a trace."],
+    }
+    if characterize:
+        evidence["evidence_kind"] = "operator-attested-write-characterization"
+        evidence["promotion_eligible"] = False
+        evidence["agent_write_behavior"] = write_behavior
+        if write_behavior == "immediate":
+            evidence["attested_controls"].pop("interactive_denial_preserves_files")
+            evidence["attested_controls"].pop("interactive_approval_is_scoped")
+        evidence["attested_controls"]["file_write_control_observed"] = True
+        evidence["limits"].extend([
+            "Diagnostic only: this is not an IDE conformance or lifecycle pass.",
+            "A direct file edit does not establish shell/MCP/fetch approval behavior.",
+            "Context OS proposal/apply and fresh-session continuity require separate IDE evidence.",
+        ])
+    write_create_only(evidence_path, evidence)
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -356,6 +396,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     record_parser.add_argument("--observations", required=True, type=Path)
     record_parser.add_argument("--evidence", required=True, type=Path)
     record_parser.add_argument("--acknowledge-operator-attestation", action="store_true")
+    record_parser.add_argument("--characterize-file-writes", action="store_true",
+                               help="record observed file-write behavior as a diagnostic, never a promotion pass")
     return parser.parse_args(argv)
 
 
@@ -367,7 +409,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"Cursor IDE fixture prepared; manifest: {args.manifest}")
         else:
             record(args)
-            print(f"Cursor IDE conformance passed; evidence: {args.evidence}")
+            if args.characterize_file_writes:
+                print(f"Cursor IDE diagnostic recorded (not a conformance pass): {args.evidence}")
+            else:
+                print(f"Cursor IDE conformance passed; evidence: {args.evidence}")
     except (HarnessError, OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
         print(f"cursor IDE conformance failed safely: {exc}", file=os.sys.stderr)
         return 1

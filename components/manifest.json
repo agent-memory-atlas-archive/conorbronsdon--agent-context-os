@@ -289,6 +289,10 @@
                     "policy": "managed"
                 },
                 {
+                    "path": "docs/releases/v0.15.0.md",
+                    "policy": "managed"
+                },
+                {
                     "path": "docs/root-contract.md",
                     "policy": "managed"
                 },
@@ -394,6 +398,10 @@
                 },
                 {
                     "path": "integrations/entries/pandoc.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "integrations/entries/pi-dash.json",
                     "policy": "development"
                 },
                 {
@@ -657,6 +665,18 @@
                     "policy": "development"
                 },
                 {
+                    "path": "adapters/acp/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "adapters/acp/protocol.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "tests/test_acp_protocol.py",
+                    "policy": "development"
+                },
+                {
                     "path": "tests/test_runtime_launch.py",
                     "policy": "development"
                 },
@@ -914,6 +934,90 @@
                 },
                 {
                     "path": "tests/test_continuity_benchmark.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-release-baseline.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-1.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-2.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-3.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-4.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-1.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-2.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-3.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-4.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-5.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-6.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/reviews.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-7.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-interactive-routing.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-v015.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-5da7b9b.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/host-diagnostic.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/observations.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/cursor-ide-2026-09-29/lifecycle.json",
                     "policy": "development"
                 }
             ]
@@ -1242,7 +1346,7 @@
         },
         {
             "id": "hermes-adapter",
-            "description": "Hermes installation guidance, live conformance harness, optional hooks, and runtime descriptor.",
+            "description": "First-class Hermes CLI installation, live conformance, optional advisory hooks, and runtime descriptor.",
             "depends_on": [
                 "core",
                 "portable-skills",
@@ -1383,7 +1487,7 @@
         },
         {
             "id": "cursor-adapter",
-            "description": "Experimental Cursor IDE and CLI onboarding, runtime descriptor, and capability-gated conformance controls.",
+            "description": "First-class Cursor CLI and experimental IDE onboarding, runtime descriptor, and conformance controls.",
             "depends_on": [
                 "core",
                 "portable-skills",
@@ -1416,6 +1520,14 @@
                 },
                 {
                     "path": "tests/test_cursor_ide_harness.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "adapters/cursor/lifecycle_conformance.py",
+                    "policy": "managed"
+                },
+                {
+                    "path": "tests/test_cursor_lifecycle_harness.py",
                     "policy": "development"
                 }
             ]

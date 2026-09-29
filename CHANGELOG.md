@@ -2,6 +2,35 @@
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-09-29 — Hermes and Cursor CLI lifecycle support
+
+### Added
+- An offline ACP protocol foundation handles request correlation, streamed
+  notifications, cancellation, and default refusal of permission requests.
+  Bounded Cursor/T3 and Hermes ACP smoke evidence remains separate from CLI
+  lifecycle support. Cursor file-edit approval controls failed in T3 Supervised
+  mode and direct ACP; neither ACP nor IDE support is promoted.
+- Pi Dash is listed as an optional experimental integration with pinned-source
+  evidence for its runner, external data flows, installation/update effects,
+  and Cursor force-mode approval limitation (#225). Context OS does not install it.
+
+### Changed
+- Onboarding leads with reviewed Git-backed handoffs, adds a pinned v0.14.0
+  template download-and-verification path, and includes unpublished next-release
+  announcement copy (#76, #148). Branch support remains distinct from released support.
+- Hermes live conformance separates tool-free instruction delivery from normal
+  lifecycle execution, while preserving the combined discovery mode for
+  reproducing earlier evidence (#163). Hermes `v0.21.5 (2026.9.24)` passed the
+  complete live lifecycle with Gemini 3.8 Flash through OpenRouter on Windows
+  and is first-class. A separate interactive probe verifies routing for all
+  four `/context-*` commands. Hooks remain advisory; short-alias invocation
+  remains unverified.
+- Cursor CLI has a separate end-to-end lifecycle conformance runner with
+  operator-reviewed apply, rejection controls, and fresh-session continuity
+  checks (#73). Agent CLI `2026.09.28-64d2043` passed the lifecycle on Windows
+  and is first-class; the IDE remains experimental. Doctor probes the
+  unambiguous `cursor-agent` executable separately from the IDE.
+
 ---
 
 ## [0.14.0] — 2026-09-29 — OpenCode, continuity evidence, and live conformance

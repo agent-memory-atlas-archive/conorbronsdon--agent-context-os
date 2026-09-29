@@ -2,9 +2,14 @@
   "schema_version": 2,
   "runtime": "cursor",
   "display_name": "Cursor",
-  "support_tier": "experimental",
-  "support_summary": "Separate IDE and CLI onboarding through root AGENTS.md and project Agent Skills, without hook, memory, or rule-conflict claims",
-  "components": ["core", "portable-skills", "agents-instructions", "cursor-adapter"],
+  "support_tier": "first-class",
+  "support_summary": "First-class Agent CLI lifecycle and handoff with exact-version evidence; IDE remains experimental, with no hook or native-memory bridge",
+  "components": [
+    "core",
+    "portable-skills",
+    "agents-instructions",
+    "cursor-adapter"
+  ],
   "install": {
     "mode": "native-project-discovery",
     "next_steps": [
@@ -19,12 +24,27 @@
       "kind": "ide",
       "support_tier": "experimental",
       "instruction_sources": [
-        {"scope": "repository", "role": "canonical", "path": "AGENTS.md", "precedence": 100}
+        {
+          "scope": "repository",
+          "role": "canonical",
+          "path": "AGENTS.md",
+          "precedence": 100
+        }
       ],
       "skill_sources": [
-        {"scope": "repository", "role": "skills", "path": ".agents/skills", "precedence": 100}
+        {
+          "scope": "repository",
+          "role": "skills",
+          "path": ".agents/skills",
+          "precedence": 100
+        }
       ],
-      "invocation": {"setup": "/context-setup", "start": "/context-start", "update": "/context-update", "end": "/context-end"},
+      "invocation": {
+        "setup": "/context-setup",
+        "start": "/context-start",
+        "update": "/context-update",
+        "end": "/context-end"
+      },
       "capabilities": {
         "agent_skills": "native",
         "explicit_invocation": "native",
@@ -38,8 +58,18 @@
       },
       "hook_output": null,
       "binary_probes": [
-        {"purpose": "availability", "candidates": ["cursor"]},
-        {"purpose": "version", "candidates": ["cursor"]}
+        {
+          "purpose": "availability",
+          "candidates": [
+            "cursor"
+          ]
+        },
+        {
+          "purpose": "version",
+          "candidates": [
+            "cursor"
+          ]
+        }
       ],
       "conformance_tests": [
         "tests/test_cursor_conformance.py",
@@ -47,20 +77,41 @@
         "tests/test_contextos_kernel.py"
       ],
       "evidence": [
-        "cursor-rules", "cursor-skills", "cursor-hooks", "cursor-mcp", "cursor-run-modes",
-        "cursor-kernel", "cursor-conformance", "cursor-ide-harness"
+        "cursor-rules",
+        "cursor-skills",
+        "cursor-hooks",
+        "cursor-mcp",
+        "cursor-run-modes",
+        "cursor-kernel",
+        "cursor-conformance",
+        "cursor-ide-harness"
       ]
     },
     "cli": {
       "kind": "cli",
-      "support_tier": "experimental",
+      "support_tier": "first-class",
       "instruction_sources": [
-        {"scope": "repository", "role": "canonical", "path": "AGENTS.md", "precedence": 100}
+        {
+          "scope": "repository",
+          "role": "canonical",
+          "path": "AGENTS.md",
+          "precedence": 100
+        }
       ],
       "skill_sources": [
-        {"scope": "repository", "role": "skills", "path": ".agents/skills", "precedence": 100}
+        {
+          "scope": "repository",
+          "role": "skills",
+          "path": ".agents/skills",
+          "precedence": 100
+        }
       ],
-      "invocation": {"setup": "/context-setup", "start": "/context-start", "update": "/context-update", "end": "/context-end"},
+      "invocation": {
+        "setup": "/context-setup",
+        "start": "/context-start",
+        "update": "/context-update",
+        "end": "/context-end"
+      },
       "capabilities": {
         "agent_skills": "native",
         "explicit_invocation": "native",
@@ -73,100 +124,175 @@
         "execution_authorization": "native"
       },
       "hook_output": null,
-      "binary_probes": [],
+      "binary_probes": [
+        {
+          "purpose": "availability",
+          "candidates": [
+            "cursor-agent"
+          ]
+        },
+        {
+          "purpose": "version",
+          "candidates": [
+            "cursor-agent"
+          ]
+        }
+      ],
       "conformance_tests": [
         "tests/test_cursor_conformance.py",
         "tests/test_cursor_live_harness.py",
-        "tests/test_contextos_kernel.py"
+        "tests/test_contextos_kernel.py",
+        "tests/test_cursor_lifecycle_harness.py"
       ],
       "evidence": [
-        "cursor-cli-using", "cursor-skills", "cursor-hooks", "cursor-cli-slash-commands", "cursor-cli-headless",
-        "cursor-cli-permissions", "cursor-mcp", "cursor-kernel", "cursor-conformance",
-        "cursor-live-harness"
+        "cursor-cli-using",
+        "cursor-skills",
+        "cursor-hooks",
+        "cursor-cli-slash-commands",
+        "cursor-cli-headless",
+        "cursor-cli-permissions",
+        "cursor-mcp",
+        "cursor-kernel",
+        "cursor-conformance",
+        "cursor-live-harness",
+        "cursor-lifecycle-harness",
+        "cursor-cli-live-evidence"
       ]
     }
   },
   "evidence": {
-    "checked_on": "2026-09-01",
-    "tested_versions": [],
+    "checked_on": "2026-09-29",
+    "tested_versions": [
+      {
+        "surface": "cli",
+        "version": "2026.09.28-64d2043"
+      }
+    ],
     "sources": [
       {
         "id": "cursor-rules",
         "type": "official",
         "location": "https://cursor.com/docs/rules",
-        "claims": ["instruction_sources"]
+        "claims": [
+          "instruction_sources"
+        ]
       },
       {
         "id": "cursor-skills",
         "type": "official",
         "location": "https://cursor.com/docs/skills",
-        "claims": ["agent_skills", "explicit_invocation", "skill_sources", "invocation"]
+        "claims": [
+          "agent_skills",
+          "explicit_invocation",
+          "skill_sources",
+          "invocation"
+        ]
       },
       {
         "id": "cursor-hooks",
         "type": "official",
         "location": "https://cursor.com/docs/hooks",
-        "claims": ["project_hooks", "blocking_pre_tool_hook"]
+        "claims": [
+          "project_hooks",
+          "blocking_pre_tool_hook"
+        ]
       },
       {
         "id": "cursor-cli-using",
         "type": "official",
         "location": "https://cursor.com/docs/cli/using",
-        "claims": ["instruction_sources"]
+        "claims": [
+          "instruction_sources"
+        ]
       },
       {
         "id": "cursor-cli-headless",
         "type": "official",
         "location": "https://cursor.com/docs/cli/headless",
-        "claims": ["execution_authorization"]
+        "claims": [
+          "execution_authorization"
+        ]
       },
       {
         "id": "cursor-cli-slash-commands",
         "type": "official",
         "location": "https://cursor.com/docs/cli/reference/slash-commands",
-        "claims": ["invocation"]
+        "claims": [
+          "invocation"
+        ]
       },
       {
         "id": "cursor-cli-permissions",
         "type": "official",
         "location": "https://cursor.com/docs/cli/reference/permissions",
-        "claims": ["execution_authorization"]
+        "claims": [
+          "execution_authorization"
+        ]
       },
       {
         "id": "cursor-run-modes",
         "type": "official",
         "location": "https://cursor.com/docs/agent/security/run-modes",
-        "claims": ["execution_authorization"]
+        "claims": [
+          "execution_authorization"
+        ]
       },
       {
         "id": "cursor-mcp",
         "type": "official",
         "location": "https://cursor.com/docs/mcp",
-        "claims": ["mcp"]
+        "claims": [
+          "mcp"
+        ]
       },
       {
         "id": "cursor-kernel",
         "type": "conformance",
         "location": "tests/test_contextos_kernel.py",
-        "claims": ["proposal_apply"]
+        "claims": [
+          "proposal_apply"
+        ]
       },
       {
         "id": "cursor-conformance",
         "type": "conformance",
         "location": "tests/test_cursor_conformance.py",
-        "claims": ["support"]
+        "claims": [
+          "support"
+        ]
       },
       {
         "id": "cursor-ide-harness",
         "type": "conformance",
         "location": "adapters/cursor/ide_conformance.py",
-        "claims": ["support"]
+        "claims": [
+          "support"
+        ]
       },
       {
         "id": "cursor-live-harness",
         "type": "conformance",
         "location": "adapters/cursor/live_conformance.py",
-        "claims": ["support"]
+        "claims": [
+          "support"
+        ]
+      },
+      {
+        "id": "cursor-lifecycle-harness",
+        "type": "conformance",
+        "location": "adapters/cursor/lifecycle_conformance.py",
+        "claims": [
+          "support",
+          "proposal_apply"
+        ]
+      },
+      {
+        "id": "cursor-cli-live-evidence",
+        "type": "conformance",
+        "location": "docs/evidence/runtime-promotion-2026-09-29/README.md",
+        "claims": [
+          "support"
+        ]
       }
     ]
   }
