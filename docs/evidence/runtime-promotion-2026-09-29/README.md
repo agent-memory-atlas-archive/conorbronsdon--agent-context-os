@@ -74,6 +74,15 @@ The subsequent preparation-only change removes the clone source remote, as
 already done for Cursor. A regression test verifies this; lifecycle prompts,
 recording, and controls are unchanged from the passing run.
 
+The [v0.15.0 preparation rerun](hermes-live-v015.json) passed every required
+control on `cd7dac2f91814b73950fdcc95ce5375d0e5ac70f`, including the source-remote
+removal. It used the same Hermes version, model route, 300-second per-call
+budget, and 40-turn limit. Setup, update, and end proposals were individually
+inspected and approved by exact digest. Optional hooks remained unsupported
+by the live test. A subsequent README index-link correction and evidence
+closeout are documentation changes; final reviewed-revision acceptance remains
+a pre-merge gate.
+
 Retained attempts:
 
 | Artifact | Outcome |

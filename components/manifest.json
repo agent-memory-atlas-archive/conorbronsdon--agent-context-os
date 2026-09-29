@@ -997,6 +997,10 @@
                     "policy": "development"
                 },
                 {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-v015.json",
+                    "policy": "development"
+                },
+                {
                     "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-5da7b9b.json",
                     "policy": "development"
                 },
