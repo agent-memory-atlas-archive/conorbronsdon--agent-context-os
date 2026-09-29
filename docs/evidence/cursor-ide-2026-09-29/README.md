@@ -92,3 +92,60 @@ Full validation on `02f2bd1` passed 977 tests, with 47 skipped, in 893.790
 seconds, plus all repository checks. A later recorder hardening rejects malformed
 write-behavior values and strict-mode contradictions, and emits the exact
 `implicit_skill_body_not_loaded` attestation. Its focused suite passed 12 tests.
+
+The follow-up implementation is `69f391f76b3970d9d17bbc23e7df3477f815bda9`.
+Its full suite reported `OK (skipped=47)` after 978 tests, followed by
+`All validation passed`; the log's wall time was 20,172.767 seconds across a
+long execution pause. The outer PowerShell redirection wrapper returned 1
+despite that success footer. Final manifest and documentation checks were
+therefore repeated with explicit native exit-code forwarding. These closeout
+notes do not change the reviewed implementation files.
+The operational free review, `inclusionai/ling-3.0-flash-sante:free`, completed
+on that exact SHA with no introduced defects at the requested confidence.
+It reported an optional coverage gap for diagnostic approval-required success;
+strict approval success and immediate diagnostic success are already tested.
+The compatibility fallback for direct callers is intentional. Packet SHA-256:
+`ad4064a566799392872c8abb95c6374a4841d8e5b5b6fe807bce53905d0be82f`.
+The tool-free stream contained only system, text, and result events (5,007 input
+and 8,975 output tokens). Both prices were verified zero in the live catalog.
+
+The adversarial lane exhausted its three candidates: Cohere timed out,
+`google/gemma-4-31b-it:free` on `02f2bd1` returned 429 with zero output, and
+`poolside/laguna-xs-2.1:free` on `69f391f` returned 429 with zero output.
+The final packet SHA-256 was
+`f1859b83f8770ad0d0997a92be00309583a5e31dffa2a839e60fe599a7f8a303`.
+These are setup failures. The required primary review remains quota-blocked
+on authenticated Claude and the eligible paid Go fallback. No sign-off is implied.
+
+The isolated IDE process exited, its answer-key ACL was restored, and its
+temporary signed-in profile was deleted after exporting the synthetic evidence.
+
+## ACP integration follow-up
+
+T3 Code connects Cursor through the CLI's ACP transport, not desktop UI control.
+Its [spawn adapter](https://github.com/pingdotgg/t3code/blob/d2c9281b8112dc3b2991642c4bdb985e4b08b9bb/apps/server/src/provider/acp/CursorAcpSupport.ts)
+launches `cursor-agent acp`; its
+[shared contract](https://github.com/pingdotgg/t3code/blob/d2c9281b8112dc3b2991642c4bdb985e4b08b9bb/apps/server/src/provider/Services/ProviderAdapter.ts)
+normalizes sessions, turns, approvals, events, and declared capability limits.
+This is a candidate for programmatic Context OS integration, not evidence that
+the desktop IDE meets its current promotion gates.
+
+A separate initialization-only probe of Cursor CLI `2026.09.28-64d2043` succeeded
+with JSON-RPC protocol version 1 in an empty isolated workspace and config.
+The agent advertised `loadSession`, session listing, image prompts, HTTP/SSE MCP,
+and `cursor_login`. The entrypoint SHA-256 was
+`9e3d6101a208743cb0c35236ece75acdcd268f329e912ade9901c9eabd52468c`.
+No authentication, session creation, model prompt, or tool permission was requested.
+Advertised capabilities still require behavioral tests before integration claims.
+[Cursor's ACP documentation](https://cursor.com/docs/cli/acp) describes the transport;
+[Hermes also documents an ACP server](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/acp.md).
+Neither protocol support nor skill metadata replaces exact-digest kernel approval.
+The isolated Hermes 0.21.5 test installation's `acp --check` reported the optional
+`acp` dependency missing; no dependency or global configuration was changed.
+
+The design lesson is to distinguish reliable lifecycle support from host feature
+parity. An ordinary skill-file read is not proof of native automatic invocation,
+and a missing file-edit approval prompt is not a failed shell-approval test.
+A future promotion-contract revision should state these capabilities separately
+and verify the promises it makes. This record preserves the current failed
+controls and does not itself revise the gate or promote the IDE.
