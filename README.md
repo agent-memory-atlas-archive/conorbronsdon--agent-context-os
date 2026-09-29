@@ -2,7 +2,7 @@
 
 # Context OS
 
-A portable, evolving Git-backed context and workflow layer for coding agents. Claude Code, Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent are first-class; Cursor IDE and Devin remain experimental.
+Keep durable project context and workflows in a Git-backed repository that supported coding agents can read and update through reviewed handoffs.
 
 [![GitHub stars](https://img.shields.io/github/stars/conorbronsdon/agent-context-os?style=social)](https://github.com/conorbronsdon/agent-context-os/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
@@ -16,11 +16,12 @@ A portable, evolving Git-backed context and workflow layer for coding agents. Cl
 
 Chat history, project instructions, and copied prompts drift apart. Context OS puts the durable parts in plain Markdown: who you are, what you are working on, decisions already made, and the workflows you want an agent to follow.
 
-Claude Code, Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent, plus the
-experimental Cursor IDE and Devin adapters, read the same repository state. A deterministic
-lifecycle kernel turns reviewed setup, checkpoint, and close requests into
-hash-checked proposals and receipts, without treating native memory as the
-source of truth.
+Claude Code, Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent have first-class
+adapters on this branch. Cursor IDE and Devin remain experimental; their available
+surfaces and evidence limits are listed in [host support](#host-support). These
+adapters route to shared repository state, with a deterministic lifecycle kernel
+that turns reviewed setup, checkpoint, and close requests into hash-checked
+proposals and receipts. Host-native memory stays separate.
 
 | What you need | How Context OS handles it |
 |---|---|
@@ -51,6 +52,22 @@ Try [your first reviewed handoff](docs/first-handoff.md) for a small Claude-to-C
 example. Then inspect [source briefings and change history](docs/continuity.md).
 
 Personal and business context often belongs in a private repository. Create an empty private repository first if that applies to you, and never commit credentials or a raw account export.
+
+### Start from a published release
+
+For a version-pinned workspace, open [v0.14.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.14.0)
+and download all five attached assets: the template `.tar`, bundle lock,
+provenance, `OFFLINE-VERIFY.md`, and `SHA256SUMS`. Follow that release's
+`agent-context-os-template-v0.14.0.OFFLINE-VERIFY.md` to verify the assets before
+extracting and running setup. GitHub's generated source ZIP and tar.gz are
+repository snapshots; the attached template tar is the canonical workspace.
+Use the [v0.14.0 release notes](docs/releases/v0.14.0.md) for what that version
+ships. Changes and support promotions described on a development branch may
+require a later release.
+
+### Start from source
+
+Clone the source when you want the current branch and its development tools:
 
 ```bash
 git clone https://github.com/conorbronsdon/agent-context-os.git my-context
