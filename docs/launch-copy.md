@@ -4,7 +4,7 @@ Drafts only. Use the [current support table](../README.md#host-support) for bran
 tiers and the selected release's notes for shipped support. Review links,
 release status, and platform length before publishing.
 
-## Next-release draft
+## v0.15.0 announcement draft
 
 Unpublished. Replace the release link and verify every host claim against the
 published release before using this copy. Earlier v0.13 drafts below are retained
@@ -19,7 +19,7 @@ Setup, checkpoints, and close requests produce a diff to review before applying
 the exact proposal. The application contributes read-only Git evidence to that
 lifecycle; host-native memory stays with its host.
 
-The next-release branch adds first-class Cursor CLI and Hermes Agent support
+Version 0.15.0 adds first-class Cursor CLI and Hermes Agent support
 alongside Claude Code, Codex, OpenClaw, and OpenCode. Cursor IDE and Devin remain
 experimental. These are scoped support claims: connecting an agent through an
 app or ACP does not inherit the CLI's lifecycle evidence.
@@ -34,7 +34,7 @@ No human onboarding-time or productivity improvement is claimed.
 ### Short version
 
 Context OS keeps project decisions and handoffs in files you can review, version,
-and carry between supported coding agents. The next-release branch adds Cursor
+and carry between supported coding agents. Version 0.15.0 adds Cursor
 CLI and Hermes support; desktop Cursor and Devin remain experimental. Start with
 one reviewed handoff: https://github.com/conorbronsdon/agent-context-os
 
@@ -45,7 +45,7 @@ get stuck. We also welcome reproducible adapter findings: include the host
 version, the command or skill you invoked, what happened, and what you expected.
 Keep credentials and private session histories out of issues.
 
-## Main announcement
+## Historical v0.13 main announcement
 
 I built `agent-context-os` because I was tired of rebuilding the same context across chats, projects, and coding agents.
 

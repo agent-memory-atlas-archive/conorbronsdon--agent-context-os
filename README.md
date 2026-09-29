@@ -17,7 +17,7 @@ Keep durable project context and workflows in a Git-backed repository that suppo
 Chat history, project instructions, and copied prompts drift apart. Context OS is a Git-backed context and workflow layer that keeps the durable parts in plain Markdown: who you are, what you are working on, decisions already made, and the workflows you want an agent to follow.
 
 Claude Code, Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent have first-class
-adapters on this branch. Cursor IDE and Devin remain experimental; their available
+adapters. Cursor IDE and Devin remain experimental; their available
 surfaces and evidence limits are listed in [host support](#host-support). These
 adapters route to shared repository state, with a deterministic lifecycle kernel
 that turns reviewed setup, checkpoint, and close requests into hash-checked
@@ -335,7 +335,7 @@ behavior of an installed agent version or an external service.
 | See every command and portable skill | [Commands and skills](docs/commands-and-skills.md) |
 | Understand component ownership and the composition/materialization substrate | [Component model](docs/component-model.md) |
 | Verify an offline bundle or inspect a structural plan | [Bundle locks and plans](docs/bundle-locks.md) |
-| Read release scope and evidence limits | [v0.15.0 preparation](docs/releases/v0.15.0.md); released [v0.14.0](docs/releases/v0.14.0.md), [v0.13.1](docs/releases/v0.13.1.md), and [v0.12.0](docs/releases/v0.12.0.md) |
+| Read release scope and evidence limits | [v0.15.0 release notes](docs/releases/v0.15.0.md); released [v0.14.0](docs/releases/v0.14.0.md), [v0.13.1](docs/releases/v0.13.1.md), and [v0.12.0](docs/releases/v0.12.0.md) |
 | Understand KernelRoot, ContextRoot, WorkingRoot, and the v0.12 compatibility boundary | [Root contract](docs/root-contract.md) |
 | Choose an optional add-on | [Integration chooser](docs/integrations-guide.md) and [catalog](references/integrations.md) |
 | Understand product language and boundaries | [Positioning](docs/positioning.md) |

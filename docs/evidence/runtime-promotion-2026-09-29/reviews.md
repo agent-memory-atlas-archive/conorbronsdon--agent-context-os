@@ -105,3 +105,31 @@ published assets and repository files; the separate positioning-test regression
 was fixed as described above. Review packets and dispositions remain in the
 operator-owned task scratch with a 2026-10-06 retention review date. This
 follow-up adds changelog and evidence prose only; implementation is unchanged.
+
+## Sonnet 5.5 final-source review
+
+Authenticated `claude-sonnet-5-5` completed a tool-free primary review on
+`4b6cbab9bfc5487294e55ef9595592b7c47c7dca`, 2026-09-29, exit 0.
+The public implementation/test/metadata diff packet SHA-256 was
+`52884a87102431fe61acef055057b3d89d1cb0eaad3474ff4f2336da4e12fbcd`.
+Large historical transcripts were excluded and the scope was explicit. The
+review found no critical or high-confidence introduced code defect.
+
+Lower-confidence findings were checked against actual files. Release wording
+and the generated Hermes preparation example were aligned with v0.15.0 and
+the documented v0.21.5, 300-second/40-turn invocation. The preparation steps
+now repeat the manual external-login-adoption prerequisite. Conservative CLI
+defaults remain available; the documented passing invocation sets its budgets
+explicitly. No automatic authentication configuration was introduced.
+
+The allegation that pinned evidence was absent at `1d5f0df` was rejected by
+reading that snapshot: it contains the cited lifecycle and interactive-routing
+records. Approval-file formatting rejection is documented fail-closed behavior;
+fixture-only isolation is explicitly not an OS sandbox. The exact-head live run
+subsequently completed, superseding the packet summary of pending acceptance.
+
+The operational `cohere/north-mini-code:free` pass also completed at `4b6cbab`,
+with zero tool events. Its published-release-link, missing Cursor runner, and
+undefined Hermes variables findings were rejected against actual files. The
+complementary Nemotron attempt timed out without a report and did not count.
+Required complementary review remains open until a completed eligible pass.

@@ -139,3 +139,18 @@ also passed. The subsequent closeout commit changes evidence documentation only.
 
 See [independent review status](reviews.md). A live pass is not independent
 review approval, and no merge or release is authorized by these artifacts.
+
+## Exact-source acceptance follow-up
+
+Hermes v0.21.5 completed all required controls on source
+`4b6cbab9bfc5487294e55ef9595592b7c47c7dca`, fixture
+`258e1af3cef3c4406db7b2fd532fad24c3f85b0c`, on 2026-09-29.
+The same Windows/Gemini 3.8 Flash route and 300-second/40-turn limits were used.
+Setup, update, and end proposal diffs were individually inspected before exact
+digest approval. Discovery, read-only start, all proposal/apply receipts,
+wrong-digest and stale-target rejection, memory separation, and unrelated-file
+preservation passed. Optional hooks remained unsupported. The retained operator
+artifact has SHA-256
+`f147de0daea0c2463067b37940d30280c49d6498f79d1e38fee98509c468bf53`.
+This records that source only; a later source revision requires acceptance
+against its own reviewed commit before merge.
