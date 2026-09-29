@@ -79,6 +79,13 @@ Hermes Agent v0.21.4 emitted only valid JSON lines in a three-line live
 `hermes chat -Q --format stream-json` probe, both with and without `-Q`.
 The installed-client launch test keeps `-Q`.
 
+On v0.21.5, `-t none` resolves to an empty tool selection but prints
+`Warning: Unknown toolsets: none` before JSON output. The tool-free discovery
+parser records that exact leading notice and rejects every other non-JSON line.
+Its no-tool-event and mutation checks still apply. Windows runs preserve
+`SYSTEMDRIVE` and `WINDIR` so native APIs do not create a literal `%SystemDrive%`
+cache directory inside the fixture.
+
 Tool-result self-read detection checks, before redacting tool results: literal
 canaries, case changes, separators or `0x` prefixes in hex canaries, reversed
 text, percent-encoding, `\u` escapes, and base64/base64url (including wrapped
@@ -87,7 +94,7 @@ counts as a self-read. It does not prove discovery against arbitrary
 transformations or unusual read commands; treat the recorded discovery control
 as bounded evidence.
 By default, pass-through is limited to
-`PATH`, `SYSTEMROOT`, `HOME`, `USERPROFILE`, `TEMP`, `TMP`, `APPDATA`,
+`PATH`, `SYSTEMROOT`, `SYSTEMDRIVE`, `WINDIR`, `HOME`, `USERPROFILE`, `TEMP`, `TMP`, `APPDATA`,
 `LOCALAPPDATA`, `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY` (including lowercase
 forms), `SSL_CERT_FILE`, `SSL_CERT_DIR`, `REQUESTS_CA_BUNDLE`,
 `CURL_CA_BUNDLE`, and `HERMES_*` variables other than `HERMES_ACCEPT_HOOKS`.

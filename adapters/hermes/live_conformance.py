@@ -565,7 +565,7 @@ def mirrors_memory(text: str, canaries: Sequence[str]) -> bool:
 
 
 def hermes_environment(home: Path, provider: str, allow: Sequence[str] = ()) -> dict[str, str]:
-    base = {"PATH", "SYSTEMROOT", "HOME", "USERPROFILE", "TEMP", "TMP", "APPDATA", "LOCALAPPDATA",
+    base = {"PATH", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "HOME", "USERPROFILE", "TEMP", "TMP", "APPDATA", "LOCALAPPDATA",
             "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "SSL_CERT_FILE", "SSL_CERT_DIR",
             "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"}
     names = base | {name.upper() for name in allow}

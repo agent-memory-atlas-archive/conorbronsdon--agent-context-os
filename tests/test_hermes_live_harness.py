@@ -694,8 +694,11 @@ class HermesLiveHarnessTest(unittest.TestCase):
 
     def test_environment_names_are_filtered(self) -> None:
         provider_value = "fixture-provider-" + uuid.uuid4().hex
-        with mock.patch.dict(os.environ, {"PRIVATE_UNRELATED": "private", "OPENROUTER_API_KEY": provider_value}):
+        with mock.patch.dict(os.environ, {"PRIVATE_UNRELATED": "private", "OPENROUTER_API_KEY": provider_value,
+                                          "SYSTEMDRIVE": "C:", "WINDIR": "C:/Windows"}):
             env = live.hermes_environment(self.home, "openrouter")
+            self.assertEqual("C:", env["SYSTEMDRIVE"])
+            self.assertEqual("C:/Windows", env["WINDIR"])
             self.assertNotIn("PRIVATE_UNRELATED", env)
             self.assertEqual(provider_value, env["OPENROUTER_API_KEY"])
             self.assertIn("PRIVATE_UNRELATED", live.hermes_environment(self.home, "openrouter", ("PRIVATE_UNRELATED",)))
