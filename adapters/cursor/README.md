@@ -7,7 +7,7 @@ configuration, and conformance gates. A green CLI check is not IDE evidence.
 
 CLI promotion is scoped to `2026.09.28-64d2043` on Windows, with host controls,
 the shipped setup/start/update/end workflows, exact-digest operator apply,
-and fresh-session handoff recorded in the [promotion evidence](../../docs/evidence/runtime-promotion-2026-09-29/README.md).
+and fresh-session handoff recorded in the [promotion evidence](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/runtime-promotion-2026-09-29/README.md).
 It does not promote the IDE or establish parity on untested platforms.
 
 ## Setup
@@ -56,7 +56,7 @@ the short aliases in Cursor, and do not duplicate these names in another Cursor
 skill root. Every shipped lifecycle core and short alias sets
 `disable-model-invocation: true` to request explicit slash invocation. This is
 not a file-read boundary: the IDE 3.22.7 implicit control read skill bodies with
-ordinary file tools despite that setting. See the [IDE host and lifecycle evidence](../../docs/evidence/cursor-ide-2026-09-29/README.md).
+ordinary file tools despite that setting. See the [IDE host and lifecycle evidence](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/cursor-ide-2026-09-29/README.md).
 The same files also carry Devin's `triggers: ["user"]`; each
 host ignores the other host's extension while the shared procedure remains
 provider-neutral.
@@ -242,14 +242,14 @@ passes. The strict recorder retains its existing checks; its diagnostic output
 cannot promote a surface. The IDE remains experimental pending review of the
 bounded lifecycle evidence and remaining invocation/discovery limits. The
 runtime's overall tier reflects its strongest surface; CLI evidence cannot
-promote the IDE. The [ACP connection foundation](../acp/README.md) is a separate
+promote the IDE. The [ACP connection foundation](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/adapters/acp/README.md) is a separate
 integration path with bounded live T3 evidence and a failed Supervised file-edit
 approval control. It has not passed full ACP lifecycle conformance.
 
 ### September 26, 2026 IDE operator run (diagnostic)
 
 An agent operator ran the prepared IDE fixture on IDE `3.21.18`
-([record](../../docs/evidence/cursor-ide-2026-09-26/README.md)), with the
+([record](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/cursor-ide-2026-09-26/README.md)), with the
 answer key made unreadable to the operator account. The root, nested, rule,
 and explicit canaries matched, and the implicit control did not return the
 skill canary. The Agent-mode denial control failed: the IDE wrote the file
@@ -262,7 +262,7 @@ The IDE surface remains unverified.
 A fresh IDE `3.22.7` run matched the canaries, resolved an explicitly selected
 slash skill, and preserved Ask-mode files. The implicit turn nevertheless read
 the explicit-only skill body while returning a different final canary. Agent
-file writes were immediate. The [record](../../docs/evidence/cursor-ide-2026-09-29/README.md)
+file writes were immediate. The [record](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/cursor-ide-2026-09-29/README.md)
 explains these limits and the recorder fix; the IDE remains experimental.
 
 ### CLI lifecycle conformance
@@ -285,7 +285,7 @@ remain the responsibility of `live_conformance.py`; both artifacts are needed.
 ### September 26, 2026 CLI conformance
 
 CLI `2026.09.26-dd393fe` passed all 14 live controls from source commit
-`281c859` ([evidence](../../docs/evidence/cursor-cli-2026-09-26/README.md)).
+`281c859` ([evidence](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/cursor-cli-2026-09-26/README.md)).
 That commit fixed the deny-precedence parser. The client reports a denied file
 write as `editToolCall` with a `writePermissionDenied` result, and the harness
 had been looking for a different event shape. This is CLI evidence only. The

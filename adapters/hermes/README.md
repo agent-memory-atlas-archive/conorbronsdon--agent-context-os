@@ -2,14 +2,14 @@
 
 Hermes CLI is first-class with installed-client evidence for Hermes Agent
 `v0.21.5 (2026.9.24)` on Windows using `google/gemini-3.8-flash` through
-OpenRouter. The [live lifecycle run](../../docs/evidence/runtime-promotion-2026-09-29/README.md)
+OpenRouter. The [live lifecycle run](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/runtime-promotion-2026-09-29/README.md)
 passed explicit skill preloading, all four phases, reviewed exact-digest apply,
 receipts, rejection controls, and native-memory separation. Optional hooks
 remain advisory. A separate interactive probe verifies the four `/context-*`
 commands; short-alias invocation remains unverified. Provider availability is
 a separate prerequisite.
 
-The [shared ACP connection foundation](../acp/README.md) has offline tests and
+The [shared ACP connection foundation](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/adapters/acp/README.md) has offline tests and
 bounded live Hermes ACP read/explicit-skill evidence. Full ACP lifecycle and app
 integration remain unverified; the CLI tier does not promote them. No ACP
 dependency or global configuration is installed by this foundation.
@@ -34,7 +34,7 @@ aliases installed; their invocation still needs a live control.
 ## Live conformance
 
 Earlier failed attempts are retained in
-[`docs/evidence/hermes-live-2026-09-23/`](../../docs/evidence/hermes-live-2026-09-23/README.md).
+[`docs/evidence/hermes-live-2026-09-23/`](https://github.com/conorbronsdon/agent-context-os/blob/1d5f0dfa590cfd189128169d1aace00526442993/docs/evidence/hermes-live-2026-09-23/README.md).
 
 From a clean, reviewed source commit, choose new sibling paths outside any
 Context OS checkout and run:
