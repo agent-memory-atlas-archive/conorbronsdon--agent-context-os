@@ -14,7 +14,7 @@ Keep durable project context and workflows in a Git-backed repository that suppo
 
 </div>
 
-Chat history, project instructions, and copied prompts drift apart. Context OS puts the durable parts in plain Markdown: who you are, what you are working on, decisions already made, and the workflows you want an agent to follow.
+Chat history, project instructions, and copied prompts drift apart. Context OS is a Git-backed context and workflow layer that keeps the durable parts in plain Markdown: who you are, what you are working on, decisions already made, and the workflows you want an agent to follow.
 
 Claude Code, Codex, OpenClaw, OpenCode, Cursor CLI, and Hermes Agent have first-class
 adapters on this branch. Cursor IDE and Devin remain experimental; their available
