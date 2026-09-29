@@ -145,13 +145,21 @@ def discovery_prompt() -> str:
 
 def verify_instruction_delivery(raw: str, canaries: dict[str, str], phase: str) -> list[dict]:
     """A separate tool-free turn proves delivery; lifecycle reads cannot prove it."""
+    # v0.21.5 resolves the unknown name to an empty tool selection but its CLI
+    # prints this exact startup warning even in -Q stream-json mode. Recognize
+    # only one leading line; do not discard arbitrary non-JSON diagnostics.
+    notice = "Warning: Unknown toolsets: none"
+    notices = []
+    if raw.splitlines()[:1] == [notice]:
+        raw = raw.split("\n", 1)[1]
+        notices = [{"type": "startup_notice", "text": notice}]
     events, assistant, _, self_read = stream_evidence(raw, canaries, phase)
     if self_read or any(event.get("type") in {"tool_use", "tool_result"} for event in events):
         raise HarnessError("tool-free discovery emitted a tool event")
     missing = [name for name in ("agents", f"context-{phase}") if canaries[name] not in assistant]
     if missing:
         raise HarnessError(f"canary not reported: {', '.join(missing)}")
-    return events
+    return notices + events
 
 
 def stream_evidence(output: str, known: Sequence[str] | dict[str, str],

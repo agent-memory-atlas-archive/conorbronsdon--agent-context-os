@@ -146,7 +146,7 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
                           "then stop. Do not apply, commit, push, or modify other files. "
                           "Use .context-os/inputs for payloads. Do not use host-native memory as input.")
                 result["prompts"][phase] = prompt
-                response = harness.agent(root, prompt, *( ["--mode", "ask"] if phase == "start" else []))
+                response = harness.agent(root, prompt, *(["--mode", "ask"] if phase == "start" else ["--force"]))
                 require_json_result(response, f"{phase} lifecycle")
                 if state(root, include_pending=phase == "start") != before:
                     raise HarnessError("lifecycle changed files before operator apply")

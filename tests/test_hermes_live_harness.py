@@ -409,6 +409,17 @@ class HermesLiveHarnessTest(unittest.TestCase):
         self.assertEqual("failed", report["controls"]["setup_discovery"])
         self.assertIn("changed fixture", report["failure"])
 
+    def test_tool_free_startup_notice_is_narrow_and_recorded(self) -> None:
+        canaries = {"agents": "agent-control", "context-setup": "skill-control"}
+        event = json.dumps({"type": "result", "text": "agent-control skill-control"})
+        notice = "Warning: Unknown toolsets: none\n"
+        events = live.verify_instruction_delivery(notice + event, canaries, "setup")
+        self.assertEqual("startup_notice", events[0]["type"])
+        for raw in (notice + notice + event, "Warning: Unknown toolsets: file\n" + event,
+                    event + "\n" + notice):
+            with self.subTest(raw=raw), self.assertRaises(live.HarnessError):
+                live.verify_instruction_delivery(raw, canaries, "setup")
+
     def test_generic_text_fails_canary(self) -> None:
         report = self.run_record("generic")
         self.assertEqual("failed", report["controls"]["run"])

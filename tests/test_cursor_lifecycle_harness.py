@@ -4,9 +4,14 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+import os
+import subprocess
+import sys
+import time
 import unittest
 
 from adapters.cursor import lifecycle_conformance as live
+from adapters.cursor.live_conformance import default_runner
 from contextos.primitives import canonical_json
 
 
@@ -64,6 +69,18 @@ class CursorLifecycleTest(unittest.TestCase):
         live.require_fact(document, 'actual saved fact')
         with self.assertRaisesRegex(live.HarnessError, 'omitted'):
             live.require_fact(document, 'expected fact')
+
+    def test_timeout_stops_descendants_holding_output_pipes(self):
+        started = time.monotonic()
+        script = "import subprocess,sys,time; subprocess.Popen([sys.executable,'-c','import time; time.sleep(60)']); time.sleep(60)"
+        with self.assertRaises(subprocess.TimeoutExpired):
+            default_runner([sys.executable, '-c', script], self.root, os.environ, 0.5)
+        self.assertLess(time.monotonic() - started, 15)
+
+    def test_runner_preserves_success_output(self):
+        result = default_runner([sys.executable, '-c', "print('control')"], self.root, os.environ, 10)
+        self.assertEqual(0, result.returncode)
+        self.assertEqual('control\n', result.stdout)
 
 
 if __name__ == '__main__':
