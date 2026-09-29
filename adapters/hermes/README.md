@@ -71,8 +71,8 @@ instruction files. The following lifecycle turn may read those files normally;
 its reads are recorded but cannot establish discovery. Neither prompt names the
 canary values. This tests explicit CLI preloading, not interactive slash routing.
 
-Use `--discovery-mode combined` only to reproduce the earlier strict self-read
-test. Evidence records the selected mode. Both modes retain proposal review,
+Use `--discovery-mode combined` to retain the earlier strict self-read
+semantics (both modes now use `-Q` for stream output). Evidence records the selected mode and effective command prompts. Both modes retain proposal review,
 wrong-digest and stale-target rejection, read-only start, and memory separation.
 
 Hermes Agent v0.21.4 emitted only valid JSON lines in a three-line live

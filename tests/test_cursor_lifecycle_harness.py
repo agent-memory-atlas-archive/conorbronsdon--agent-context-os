@@ -59,6 +59,12 @@ class CursorLifecycleTest(unittest.TestCase):
         with self.assertRaisesRegex(live.HarnessError, 'before review'):
             live.approve(self.root, 'setup', {'proposal_digest': 'a' * 64}, timeout=0)
 
+    def test_requested_fact_must_be_saved_not_only_displayed(self):
+        document = {'changes': [{'after_text': 'actual saved fact', 'diff': '+expected fact'}]}
+        live.require_fact(document, 'actual saved fact')
+        with self.assertRaisesRegex(live.HarnessError, 'omitted'):
+            live.require_fact(document, 'expected fact')
+
 
 if __name__ == '__main__':
     unittest.main()

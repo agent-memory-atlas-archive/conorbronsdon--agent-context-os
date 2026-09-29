@@ -227,7 +227,9 @@ preservation, and a fresh session reading the saved handoff. Run it from a clean
 commit with `--binary`, `--expected-version`, `--source-sha`, `--evidence`, an
 empty external `--approval-dir`, and `--allow-model-traffic`. Review each
 `<phase>.review.txt`, then write only its exact approved digest, with no newline,
-to `<phase>.approve`. It never supplies approval itself. Host permission controls
+to `<phase>.approve`. On Windows, use
+`[IO.File]::WriteAllText('<phase>.approve', '<digest>')`; shell redirection may
+add a newline or incompatible encoding. It never supplies approval itself. Host permission controls
 remain the responsibility of `live_conformance.py`; both artifacts are needed.
 
 CLI `2026.09.26-dd393fe` passed all 14 live controls from source commit
