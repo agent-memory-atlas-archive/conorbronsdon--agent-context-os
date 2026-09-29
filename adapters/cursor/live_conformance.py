@@ -15,7 +15,7 @@ import secrets
 import signal
 import subprocess
 import tempfile
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -95,16 +95,19 @@ def default_runner(
     )
     try:
         stdout, stderr = process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
+    except BaseException:
         # Killing only cmd.exe leaves the Windows launcher and model process
         # holding the pipes open, so communicate() can otherwise wait forever.
-        if os.name == "nt":
-            subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-        else:
-            os.killpg(process.pid, signal.SIGKILL)
-        process.kill()
-        process.communicate(timeout=10)
+        with suppress(OSError, subprocess.SubprocessError):
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+            else:
+                os.killpg(process.pid, signal.SIGKILL)
+        with suppress(OSError):
+            process.kill()
+        with suppress(OSError, subprocess.SubprocessError):
+            process.communicate(timeout=10)
         raise
     return CommandResult(list(argv), process.returncode, stdout, stderr)
 

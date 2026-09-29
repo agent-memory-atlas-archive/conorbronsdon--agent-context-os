@@ -12,6 +12,7 @@ import secrets
 import subprocess
 import sys
 import time
+import unicodedata
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from adapters.cursor.live_conformance import (
@@ -28,6 +29,26 @@ PHASES = ("setup", "start", "update", "end")
 def require_fact(document: dict, fact: str) -> None:
     if not any(fact in change["after_text"] for change in document["changes"]):
         raise HarnessError("proposal omitted the requested synthetic fact")
+
+
+def git_state(root: Path) -> dict[str, str]:
+    """Track control metadata without treating read-only index refresh as a write."""
+    result = {}
+    for name in ("HEAD", "config", "packed-refs", "refs", "hooks"):
+        path = root / ".git" / name
+        if is_link_like(path):
+            raise HarnessError("fixture Git metadata contains a link")
+        paths = path.rglob("*") if path.is_dir() else [path]
+        for item in paths:
+            if is_link_like(item):
+                raise HarnessError("fixture Git metadata contains a link")
+            if item.is_file():
+                result[item.relative_to(root).as_posix()] = hashlib.sha256(item.read_bytes()).hexdigest()
+    staged = subprocess.run(["git", "diff", "--cached", "--exit-code"], cwd=root,
+                            capture_output=True, check=False)
+    if staged.returncode:
+        raise HarnessError("fixture index changed")
+    return result
 
 
 def state(root: Path, *, include_pending: bool = True) -> dict[str, str]:
@@ -63,7 +84,8 @@ def proposal(root: Path, previous: set[Path], phase: str) -> tuple[Path, dict]:
     for change in document["changes"]:
         if not isinstance(change, dict) or not all(isinstance(change.get(k), str) for k in ("path", "diff", "after_text")):
             raise HarnessError("proposal lacks reviewable text")
-        if any(ord(c) < 32 and c not in "\n\t" for c in change["path"] + change["diff"]):
+        if any(unicodedata.category(c) in {"Cc", "Cf", "Zl", "Zp"} and c not in "\n\t"
+               for c in change["path"] + change["diff"]):
             raise HarnessError("unsafe proposal display")
     return path, document
 
@@ -127,6 +149,9 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
                                      str(REPOSITORY_ROOT), str(root)], capture_output=True, check=False)
             if cloned.returncode:
                 raise HarnessError("cannot clone clean source fixture")
+            subprocess.run(["git", "remote", "remove", "origin"], cwd=root,
+                           capture_output=True, check=True)
+            metadata = git_state(root)
             harness.preflight(root)
             (root / "unrelated-sentinel.txt").write_text(secrets.token_hex(24), encoding="utf-8")
             controls[current] = "passed"
@@ -154,6 +179,8 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
                 head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
                 if head != source_sha:
                     raise HarnessError("model changed fixture HEAD")
+                if git_state(root) != metadata:
+                    raise HarnessError("model changed fixture Git metadata")
                 if phase == "start":
                     controls["start_read_only"] = "passed"
                     continue
@@ -215,6 +242,8 @@ def execute(harness: CursorHarness, approvals: Path, evidence: Path) -> dict:
                 "--mode", "ask"), "new-session handoff")
             result["handoff_value_recovered"] = handoff_value in answer
             result["handoff_read_only"] = state(root) == before
+            if git_state(root) != metadata:
+                raise HarnessError("handoff changed fixture Git metadata")
             result["handoff_answer_sha256"] = hashlib.sha256(answer.encode()).hexdigest()
             if not result["handoff_value_recovered"] or not result["handoff_read_only"]:
                 raise HarnessError(f"handoff failed: value recovered={result['handoff_value_recovered']}, read-only={result['handoff_read_only']}")

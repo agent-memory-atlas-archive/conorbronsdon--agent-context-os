@@ -415,10 +415,21 @@ class HermesLiveHarnessTest(unittest.TestCase):
         notice = "Warning: Unknown toolsets: none\n"
         events = live.verify_instruction_delivery(notice + event, canaries, "setup")
         self.assertEqual("startup_notice", events[0]["type"])
-        for raw in (notice + notice + event, "Warning: Unknown toolsets: file\n" + event,
+        for raw in (notice.rstrip('\n'), notice + notice + event, "Warning: Unknown toolsets: file\n" + event,
                     event + "\n" + notice):
             with self.subTest(raw=raw), self.assertRaises(live.HarnessError):
                 live.verify_instruction_delivery(raw, canaries, "setup")
+
+    def test_tool_free_lifecycle_rejects_memory_and_premature_writes(self) -> None:
+        for mode in ('mutate-native-memory', 'propose-memory', 'premature-apply', 'mutate-start'):
+            with self.subTest(mode=mode):
+                # Each case needs its own immutable baseline and empty proposal store.
+                if mode != 'mutate-native-memory':
+                    self.tearDown()
+                    self.doCleanups()
+                    self.setUp()
+                report = self.run_record(mode, discovery_mode='tool-free')
+                self.assertEqual('failed', report['controls']['run'])
 
     def test_generic_text_fails_canary(self) -> None:
         report = self.run_record("generic")

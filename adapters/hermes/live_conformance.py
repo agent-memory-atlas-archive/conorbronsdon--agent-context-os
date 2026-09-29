@@ -168,7 +168,7 @@ def verify_instruction_delivery(raw: str, canaries: dict[str, str], phase: str) 
     notice = "Warning: Unknown toolsets: none"
     notices = []
     if raw.splitlines()[:1] == [notice]:
-        raw = raw.split("\n", 1)[1]
+        raw = raw.partition("\n")[2]
         notices = [{"type": "startup_notice", "text": notice}]
     events, assistant, _, self_read = stream_evidence(raw, canaries, phase)
     if self_read or any(event.get("type") in {"tool_use", "tool_result"} for event in events):

@@ -9,6 +9,7 @@ import subprocess
 import sys
 import time
 import unittest
+from unittest import mock
 
 from adapters.cursor import lifecycle_conformance as live
 from adapters.cursor.live_conformance import default_runner
@@ -81,6 +82,42 @@ class CursorLifecycleTest(unittest.TestCase):
         result = default_runner([sys.executable, '-c', "print('control')"], self.root, os.environ, 10)
         self.assertEqual(0, result.returncode)
         self.assertEqual('control\n', result.stdout)
+
+    def test_interrupt_cleans_up_process_and_preserves_exception(self):
+        process = mock.Mock(pid=123)
+        process.communicate.side_effect = [KeyboardInterrupt, ('', '')]
+        with mock.patch('adapters.cursor.live_conformance.subprocess.Popen', return_value=process), \
+             mock.patch('adapters.cursor.live_conformance.subprocess.run'), \
+             mock.patch('adapters.cursor.live_conformance.os.killpg', create=True), \
+             self.assertRaises(KeyboardInterrupt):
+            default_runner(['fixture'], self.root, {}, 10)
+        process.kill.assert_called_once()
+        self.assertEqual(2, process.communicate.call_count)
+
+    def test_git_state_detects_refs_config_and_staged_changes(self):
+        subprocess.run(['git', 'init', '-q', str(self.root)], check=True)
+        (self.root / 'seed').write_text('seed')
+        subprocess.run(['git', 'add', 'seed'], cwd=self.root, check=True)
+        subprocess.run(['git', '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.test',
+                        'commit', '-qm', 'seed'], cwd=self.root, check=True)
+        before = live.git_state(self.root)
+        subprocess.run(['git', 'tag', 'unexpected'], cwd=self.root, check=True)
+        self.assertNotEqual(before, live.git_state(self.root))
+        (self.root / 'seed').write_text('staged')
+        subprocess.run(['git', 'add', 'seed'], cwd=self.root, check=True)
+        with self.assertRaisesRegex(live.HarnessError, 'index changed'):
+            live.git_state(self.root)
+
+    def test_proposal_rejects_unicode_display_spoofing(self):
+        folder = self.root / '.context-os/proposals'
+        folder.mkdir(parents=True)
+        for control in ('\x7f', '\x85', '\u202e', '\u2066'):
+            document = {'workflow': 'update', 'changes': [
+                {'path': 'state/current.md', 'diff': '+' + control, 'after_text': control}]}
+            document['proposal_digest'] = hashlib.sha256(canonical_json(document).encode()).hexdigest()
+            (folder / 'proposal.json').write_text(json.dumps(document))
+            with self.subTest(control=repr(control)), self.assertRaisesRegex(live.HarnessError, 'unsafe proposal display'):
+                live.proposal(self.root, set(), 'update')
 
 
 if __name__ == '__main__':
