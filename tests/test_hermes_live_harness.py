@@ -61,6 +61,17 @@ if sys.argv[sys.argv.index('--format') + 1] != 'stream-json':
     sys.exit(3)
 def emit(event):
     print(json.dumps(event))
+if '-t' in sys.argv and sys.argv[sys.argv.index('-t') + 1] == 'none':
+    if mode == 'discovery-tool-event':
+        emit({'type': 'tool_use', 'name': 'read_file', 'input': {'path': 'AGENTS.md'}})
+    if mode == 'discovery-mutate':
+        (root / 'state/current.md').write_text('changed')
+    values = [canaries['agents'], canaries['context-' + phase]]
+    if mode == 'discovery-missing':
+        values.pop()
+    emit({'type': 'result', 'exit_code': 0, 'text': ' '.join(values)})
+    sys.exit(0)
+
 if mode == 'skill-view-idless-pair':
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': phase}})
     emit({'type': 'tool_use', 'name': 'skill_view', 'input': {'name': 'context-' + phase}})
@@ -195,13 +206,25 @@ else:
 
 
 class HermesLiveHarnessTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Materialize the same immutable source tree once, rather than spawning
+        # one git cat-file process per file for every negative control.
+        cls.source_fixture = ROOT / ".hermes-test-root" / ("source-" + uuid.uuid4().hex)
+        cls.source_fixture.parent.mkdir(parents=True, exist_ok=True)
+        copy_tracked_fixture(ROOT, cls.source_fixture, live.git(ROOT, "rev-parse", "HEAD"))
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(cls.source_fixture, ignore_errors=True)
+
     def setUp(self) -> None:
         self.base = ROOT / ".hermes-test-root" / uuid.uuid4().hex
         self.base.mkdir(parents=True)
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
         self.fixture = self.base / "fixture"
         source_sha = live.git(ROOT, "rev-parse", "HEAD")
-        copy_tracked_fixture(ROOT, self.fixture, source_sha)
+        shutil.copytree(self.source_fixture, self.fixture)
         self.home = self.base / "hermes-home"
         self.home.mkdir()
         (self.home / "memories").mkdir()
@@ -324,7 +347,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
             live.new_proposal(self.fixture, set(), "update")
 
     def run_record(self, mode: str = "", input_fn=None, approval_dir=None,
-                   approval_timeout=900, provider="fake", env_allow=(), no_key_check=None) -> dict:
+                   approval_timeout=900, provider="fake", env_allow=(), no_key_check=None, discovery_mode="combined") -> dict:
         original_command = live.command
         def kernel_command(argv, cwd, env=None, timeout=120, raw_output=False):
             if mode == "accept-wrong" and argv[:2] == ["bash", "scripts/contextos.sh"] and "0" * 64 in argv:
@@ -357,7 +380,34 @@ class HermesLiveHarnessTest(unittest.TestCase):
                                    expected_version="Hermes Agent v0.21.4",
                                    approval_dir=approval_dir, approval_timeout=approval_timeout,
                                    manifest_path=self.manifest_path, env_allow=("FAKE_HERMES_MODE", *env_allow),
-                                   no_key_check=(provider == "fake" if no_key_check is None else no_key_check))
+                                   no_key_check=(provider == "fake" if no_key_check is None else no_key_check),
+                                   discovery_mode=discovery_mode)
+
+    def test_tool_free_discovery_allows_later_instruction_reads(self) -> None:
+        report = self.run_record("self-read-agents", discovery_mode="tool-free")
+        self.assertEqual("passed", report["controls"]["run"], report.get("failure"))
+        self.assertEqual("tool-free", report["discovery_mode"])
+        for phase in live.PHASES:
+            self.assertEqual("passed", report["controls"][f"{phase}_discovery"])
+        chats = [call for call in report["commands"] if "chat" in call["argv"]]
+        self.assertEqual(8, len(chats))
+        self.assertTrue(all("-t" in call["argv"] for call in chats[::2]))
+        self.assertTrue(all(call["instruction_self_read"] for call in chats[1::2]))
+
+    def test_tool_free_discovery_rejects_tools(self) -> None:
+        report = self.run_record("discovery-tool-event", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("tool event", report["failure"])
+
+    def test_tool_free_discovery_rejects_missing_canary(self) -> None:
+        report = self.run_record("discovery-missing", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("canary not reported", report["failure"])
+
+    def test_tool_free_discovery_rejects_mutation(self) -> None:
+        report = self.run_record("discovery-mutate", discovery_mode="tool-free")
+        self.assertEqual("failed", report["controls"]["setup_discovery"])
+        self.assertIn("changed fixture", report["failure"])
 
     def test_generic_text_fails_canary(self) -> None:
         report = self.run_record("generic")

@@ -1417,6 +1417,14 @@
                 {
                     "path": "tests/test_cursor_ide_harness.py",
                     "policy": "development"
+                },
+                {
+                    "path": "adapters/cursor/lifecycle_conformance.py",
+                    "policy": "managed"
+                },
+                {
+                    "path": "tests/test_cursor_lifecycle_harness.py",
+                    "policy": "development"
                 }
             ]
         },

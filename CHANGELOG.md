@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+- Hermes live conformance separates tool-free instruction delivery from normal
+  lifecycle execution, while preserving the combined discovery mode for
+  reproducing earlier evidence (#163).
+- Cursor CLI has a separate end-to-end lifecycle conformance runner with
+  operator-reviewed apply, rejection controls, and fresh-session continuity
+  checks (#73). Support promotion still requires passing live evidence.
+
 ---
 
 ## [0.14.0] — 2026-09-29 — OpenCode, continuity evidence, and live conformance

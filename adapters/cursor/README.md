@@ -219,6 +219,17 @@ The IDE surface remains unverified.
 
 ### September 26, 2026 CLI conformance
 
+The separate `adapters/cursor/lifecycle_conformance.py` exercises the shipped
+four lifecycle skills in a disposable clone. It checks read-only start,
+proposal-only mutation turns, operator-approved exact-digest apply and receipts,
+wrong and stale digest rejection, exact applied content, unrelated-file
+preservation, and a fresh session reading the saved handoff. Run it from a clean
+commit with `--binary`, `--expected-version`, `--source-sha`, `--evidence`, an
+empty external `--approval-dir`, and `--allow-model-traffic`. Review each
+`<phase>.review.txt`, then write only its exact approved digest, with no newline,
+to `<phase>.approve`. It never supplies approval itself. Host permission controls
+remain the responsibility of `live_conformance.py`; both artifacts are needed.
+
 CLI `2026.09.26-dd393fe` passed all 14 live controls from source commit
 `281c859` ([evidence](../../docs/evidence/cursor-cli-2026-09-26/README.md)).
 That commit fixed the deny-precedence parser. The client reports a denied file

@@ -63,11 +63,17 @@ and a byte-identical sentinel. The manifest stays outside the fixture, and
 the canary edits are committed in the disposable fixture. Evidence names both
 the source and fixture commits.
 
-Phase prompts ask for the canary values in the repository and loaded skill
-instructions without naming the marker prefix or canary values. Discovery
-requires both reported canaries and no self-read. The preloaded skill reaches
-the model through its prompt; the model need not call `skill_view`. Evidence
-still records any `skill_view` names.
+By default, each phase first runs a separate instruction-delivery turn with
+`-t none` and the phase skill preloaded through `-s`. That turn must report both
+instruction canaries, emit no tool event, and leave fixture and native memory
+unchanged. It proves delivery without relying on the model choosing not to read
+instruction files. The following lifecycle turn may read those files normally;
+its reads are recorded but cannot establish discovery. Neither prompt names the
+canary values. This tests explicit CLI preloading, not interactive slash routing.
+
+Use `--discovery-mode combined` only to reproduce the earlier strict self-read
+test. Evidence records the selected mode. Both modes retain proposal review,
+wrong-digest and stale-target rejection, read-only start, and memory separation.
 
 Hermes Agent v0.21.4 emitted only valid JSON lines in a three-line live
 `hermes chat -Q --format stream-json` probe, both with and without `-Q`.

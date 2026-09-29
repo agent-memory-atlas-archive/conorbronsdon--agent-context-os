@@ -137,6 +137,23 @@ def prompt_for(phase: str) -> str:
     return prompt + " Also report the fixture canary values stated in the repository instructions and the skill instructions you loaded."
 
 
+def discovery_prompt() -> str:
+    return ("Report only the fixture canary values already supplied in the repository "
+            "instructions and the preloaded skill instructions. Do not execute the "
+            "workflow. No tools are available for this instruction-delivery control.")
+
+
+def verify_instruction_delivery(raw: str, canaries: dict[str, str], phase: str) -> list[dict]:
+    """A separate tool-free turn proves delivery; lifecycle reads cannot prove it."""
+    events, assistant, _, self_read = stream_evidence(raw, canaries, phase)
+    if self_read or any(event.get("type") in {"tool_use", "tool_result"} for event in events):
+        raise HarnessError("tool-free discovery emitted a tool event")
+    missing = [name for name in ("agents", f"context-{phase}") if canaries[name] not in assistant]
+    if missing:
+        raise HarnessError(f"canary not reported: {', '.join(missing)}")
+    return events
+
+
 def stream_evidence(output: str, known: Sequence[str] | dict[str, str],
                     phase: str | None = None) -> tuple[list[dict], str, list[str], bool]:
     markers = tuple(known.values()) if isinstance(known, dict) else tuple(known)
@@ -597,7 +614,10 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
            provider: str, run_budget: int, max_turns: int, input_fn=input,
            expected_version: str = "", approval_dir: Path | None = None,
            approval_timeout: float = 900, manifest_path: Path | None = None,
-           env_allow: Sequence[str] = (), no_key_check: bool = False) -> dict:
+           env_allow: Sequence[str] = (), no_key_check: bool = False,
+           discovery_mode: str = "tool-free") -> dict:
+    if discovery_mode not in {"tool-free", "combined"}:
+        raise HarnessError("unknown discovery mode")
     fixture, home, evidence = fixture.resolve(), home.resolve(), evidence.resolve(strict=False)
     if not home.is_dir() or fixture in home.parents or home in fixture.parents:
         raise HarnessError("HERMES_HOME must be a separate existing directory")
@@ -634,6 +654,7 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
         if marker not in (home / "memories" / name).read_text(encoding="utf-8"):
             raise HarnessError("synthetic native memory canary is missing")
     result = {"started_at": now(), "source_sha": manifest["source_sha"], "fixture_commit": manifest["fixture_commit"],
+              "discovery_mode": discovery_mode,
               "os": platform.platform(), "fresh_hermes_home": True,
               "operator_mode": "approval-dir" if approval_dir is not None else "interactive",
               "model": route_id(model, "model"), "provider": route_id(provider, "provider"),
@@ -701,10 +722,34 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
                                          for name, marker in manifest["native_memory_canaries"].items()}}
         for phase in PHASES:
             current_control = f"{phase}_discovery"
+            if discovery_mode == "tool-free":
+                discovery_before = tracked_state(fixture)
+                discovery_argv = [*binary, "chat", "-Q", "--format", "stream-json", "--source", "tool",
+                                  "-m", model, "--provider", provider, "--run-budget", str(run_budget),
+                                  "--max-turns", "1", "-t", "none", "-s", f"context-{phase}",
+                                  "-q", discovery_prompt()]
+                delivery = command(discovery_argv, fixture, env, timeout=run_budget + 30, raw_output=True)
+                delivery_raw = delivery.pop("_raw_stdout")
+                delivery.pop("_raw_stderr")
+                delivery["stdout"] = "[stream-json events recorded separately]"
+                result["commands"].append(delivery)
+                if delivery["exit_code"]:
+                    raise HarnessError(f"{phase} instruction delivery failed or timed out")
+                delivery["events"] = verify_instruction_delivery(delivery_raw, stream_canaries, phase)
+                if tracked_state(fixture) != discovery_before:
+                    raise HarnessError("tool-free discovery changed fixture files")
+                check_native_memory(home, memory_before, memory_contents, result,
+                                    tuple(manifest["native_memory_canaries"].values()))
+                result["controls"][current_control] = "passed"
+                if phase == "setup":
+                    result["controls"]["agents_discovery"] = "passed"
+                current_control = f"{phase}_lifecycle"
             before = tracked_state(fixture, include_kernel=phase == "start")
             proposals = set((fixture / ".context-os" / "proposals").glob("*.json"))
             prompt = prompt_for(phase)
-            argv = [*binary, "chat", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
+            if discovery_mode == "tool-free":
+                prompt = prompt.split(" Also report the fixture canary")[0]
+            argv = [*binary, "chat", "-Q", "--format", "stream-json", "--source", "tool", "-m", model, "--provider", provider,
                     "--run-budget", str(run_budget), "--max-turns", str(max_turns), "-s", f"context-{phase}", "-q", prompt]
             call = command(argv, fixture, env, timeout=run_budget + 30, raw_output=True)
             raw = call.pop("_raw_stdout")
@@ -714,22 +759,22 @@ def record(fixture: Path, home: Path, evidence: Path, binary: Sequence[str], mod
             current_control = "memory_separation"
             check_native_memory(home, memory_before, memory_contents, result,
                                 tuple(manifest["native_memory_canaries"].values()))
-            current_control = f"{phase}_discovery"
+            current_control = f"{phase}_lifecycle" if discovery_mode == "tool-free" else f"{phase}_discovery"
             if call["exit_code"]:
                 raise HarnessError(f"{phase} chat failed or timed out")
             events, assistant, skills, self_read = stream_evidence(raw, stream_canaries, phase)
             call["events"] = events
             call["skill_view_names"] = skills
-            required = [canaries["agents"], canaries[f"context-{phase}"]]
-            if self_read:
-                raise HarnessError("self-read: discovery not shown")
-            missing = [name for name, value in (("agents", canaries["agents"]), (f"context-{phase}", canaries[f"context-{phase}"]))
-                       if value not in assistant]
-            if missing:
-                raise HarnessError(f"canary not reported: {', '.join(missing)}")
-            result["controls"][f"{phase}_discovery"] = "passed"
-            if phase == "setup":
-                result["controls"]["agents_discovery"] = "passed"
+            call["instruction_self_read"] = self_read
+            if discovery_mode == "combined":
+                if self_read:
+                    raise HarnessError("self-read: discovery not shown")
+                missing = [name for name in ("agents", f"context-{phase}") if canaries[name] not in assistant]
+                if missing:
+                    raise HarnessError(f"canary not reported: {', '.join(missing)}")
+                result["controls"][f"{phase}_discovery"] = "passed"
+                if phase == "setup":
+                    result["controls"]["agents_discovery"] = "passed"
             current_control = "memory_separation"
             check_memory(fixture, home, manifest["native_memory_canaries"])
             check_native_memory(home, memory_before, memory_contents, result,
@@ -822,6 +867,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     run.add_argument("--run-budget", type=int, default=120)
     run.add_argument("--max-turns", type=int, default=20)
     run.add_argument("--approval-dir")
+    run.add_argument("--discovery-mode", choices=("tool-free", "combined"), default="tool-free")
     args = parser.parse_args(argv)
     try:
         if args.action == "prepare":
@@ -834,7 +880,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                             expected_version=args.expected_version,
                             approval_dir=Path(args.approval_dir) if args.approval_dir else None,
                             manifest_path=Path(args.manifest), env_allow=args.env_allow,
-                            no_key_check=args.no_key_check)
+                            no_key_check=args.no_key_check, discovery_mode=args.discovery_mode)
             print(json.dumps({"controls": result["controls"], "evidence": args.evidence}, indent=2))
             return 0 if result["controls"]["run"] == "passed" else 1
     except HarnessError as exc:
