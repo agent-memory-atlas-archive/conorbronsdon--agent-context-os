@@ -289,6 +289,10 @@
                     "policy": "managed"
                 },
                 {
+                    "path": "docs/releases/v0.15.0.md",
+                    "policy": "managed"
+                },
+                {
                     "path": "docs/root-contract.md",
                     "policy": "managed"
                 },
@@ -986,6 +990,10 @@
                 },
                 {
                     "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-7.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-interactive-routing.json",
                     "policy": "development"
                 },
                 {

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.15.0] — 2026-09-29 — Hermes and Cursor CLI lifecycle support
+
 ### Added
 - An offline ACP protocol foundation handles request correlation, streamed
   notifications, cancellation, and default refusal of permission requests.
@@ -20,8 +22,9 @@
   lifecycle execution, while preserving the combined discovery mode for
   reproducing earlier evidence (#163). Hermes `v0.21.5 (2026.9.24)` passed the
   complete live lifecycle with Gemini 3.8 Flash through OpenRouter on Windows
-  and is first-class. Hooks remain advisory and interactive slash routing
-  remains outside the recorded single-query evidence.
+  and is first-class. A separate interactive probe verifies routing for all
+  four `/context-*` commands. Hooks remain advisory; short-alias invocation
+  remains unverified.
 - Cursor CLI has a separate end-to-end lifecycle conformance runner with
   operator-reviewed apply, rejection controls, and fresh-session continuity
   checks (#73). Agent CLI `2026.09.28-64d2043` passed the lifecycle on Windows

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "scope": "Interactive slash routing, not lifecycle execution or root-instruction discovery",
+  "source_commit": "8366f6ce7c31042d85fad879834f34321f90e83f",
+  "fixture_commit": "4e9472c0a9b80bebd5bb3625ae9494eb9c42ec82",
+  "prepared_at": "2026-09-29T18:33:44.920846+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "client_version": "Hermes Agent v0.21.5 (2026.9.24)",
+  "model": "google/gemini-3.8-flash",
+  "provider": "openrouter",
+  "terminal": "Windows ConPTY via pywinpty; actual interactive hermes chat; no -q or -s",
+  "tool_count": 0,
+  "assistant_turns": 4,
+  "phases": [
+    {
+      "command": "/context-setup",
+      "loaded_skill": "context-setup",
+      "skill_source_sha256": "8f3c762531494252506bf0fbf4a201b49da1f0d7dea38a06ea746d309e0223d6",
+      "assistant_response": "0907948a06696f69f282e7d349c0cd59",
+      "expected_canary": "0907948a06696f69f282e7d349c0cd59",
+      "complete_skill_in_user_message": true,
+      "passed": true
+    },
+    {
+      "command": "/context-start",
+      "loaded_skill": "context-start",
+      "skill_source_sha256": "77d9230b2a6131d52fb72c6e0360b3d324c92bb5d1e5e3eaf9bba3409c7d22d4",
+      "assistant_response": "e6759dc492a56e31f185160ccba008ee",
+      "expected_canary": "e6759dc492a56e31f185160ccba008ee",
+      "complete_skill_in_user_message": true,
+      "passed": true
+    },
+    {
+      "command": "/context-update",
+      "loaded_skill": "context-update",
+      "skill_source_sha256": "e6df6087081db3db0831b800792b501385f304472bdd2ed6b0c64643e572a4eb",
+      "assistant_response": "8f27e54240b74a96c3dabae94d4ad8b8",
+      "expected_canary": "8f27e54240b74a96c3dabae94d4ad8b8",
+      "complete_skill_in_user_message": true,
+      "passed": true
+    },
+    {
+      "command": "/context-end",
+      "loaded_skill": "context-end",
+      "skill_source_sha256": "47f0856a8ee0a37cd305397f7fdf5ff7966e805ce0fe6178fa92a0b11254b296",
+      "assistant_response": "44c69b3593371708037121842a13b5f3",
+      "expected_canary": "44c69b3593371708037121842a13b5f3",
+      "complete_skill_in_user_message": true,
+      "passed": true
+    }
+  ],
+  "unknown_command_control": {
+    "command": "/context-no-such-fixture-skill",
+    "rejected_without_model_message": true
+  },
+  "tracked_files_unchanged": true,
+  "only_expected_untracked_files": true,
+  "sentinel_unchanged": true,
+  "native_memory_files_unchanged": true,
+  "terminal_sha256": "ea025ac0aeb1c2d3a49466a55755fbb7c70f8ae5b66f2ad83137f1372d331159",
+  "limits": [
+    "Short aliases were installed but their invocation was not tested.",
+    "The first prompt requested root and skill canaries, but the response contained only the skill canary. Root discovery is not established by this probe.",
+    "Single interactive session, four distinct skill canaries; workflow execution was intentionally suppressed."
+  ],
+  "status": "passed_for_declared_scope"
+}

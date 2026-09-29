@@ -92,6 +92,36 @@ Hermes built-ins.
 
 ## Validation and review
 
+### Hermes interactive command routing
+
+The [interactive routing probe](hermes-interactive-routing.json) ran Hermes
+v0.21.5 in a Windows ConPTY against source `8366f6c`, using a fresh profile and
+the same synthetic fixture preparation. It launched `hermes chat` with Gemini
+3.8 Flash through OpenRouter, `-t none --safe-mode --ignore-user-config`, a
+120-second per-call budget, and one turn per response. Neither `-q` nor `-s`
+was supplied.
+
+Each of `/context-setup`, `/context-start`, `/context-update`, and `/context-end`
+loaded its complete skill into the user message and returned that skill's
+distinct random canary, with zero tool calls. An invented
+`/context-no-such-fixture-skill` command was rejected without a model message.
+Tracked files, the unrelated sentinel, and synthetic native-memory files were
+unchanged. The eight source skill hashes remain bound to the fixture manifest.
+
+To reproduce, prepare a fresh fixture and home with the documented live
+conformance command, disable external login adoption, trust the fixture, and
+start an interactive chat with those options. Enter each `/context-*` command
+with: `Report only the fixture canary stated in the <skill-name> skill loaded
+for this command. Do not use tools or begin the workflow.` Compare the answer
+with that phase's manifest canary outside the fixture, then enter the invented
+command. Inspect the session records for the expanded skill body, exact
+assistant answers, and absence of tool calls; compare fixture and memory bytes.
+
+This proves routing, not interactive lifecycle execution. The first prompt
+requested both root and skill canaries, but returned only the skill canary;
+root-instruction discovery is established by the separate lifecycle evidence,
+not by this probe. Short-alias invocation remains untested.
+
 Final `bash scripts/validate-all.sh` passed on implementation commit
 `e84e094e4131a15d51e88d92399ed2c3816a3bef`: 972 tests in 876.839 seconds,
 47 skipped, plus hook and portability checks, links, manifests, schemas, and
