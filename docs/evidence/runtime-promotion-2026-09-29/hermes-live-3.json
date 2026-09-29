@@ -1,0 +1,180 @@
+{
+  "started_at": "2026-09-29T06:16:30.507353+00:00",
+  "source_sha": "ebcbe895a7aa572768423fa3c23cdb36ed5ff942",
+  "fixture_commit": "41adf0cf3d5bd603d6be292ea099d64f350c22a7",
+  "discovery_mode": "tool-free",
+  "os": "Windows-11-10.0.26200-SP0",
+  "fresh_hermes_home": true,
+  "operator_mode": "approval-dir",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "provider": "openrouter",
+  "controls": {
+    "provider_key_preflight": "passed",
+    "version": "passed",
+    "project_skill_trust": "passed",
+    "agents_discovery": "passed",
+    "setup_discovery": "passed",
+    "setup_proposal_apply": "unsupported",
+    "start_discovery": "unsupported",
+    "start_read_only": "unsupported",
+    "update_discovery": "unsupported",
+    "update_proposal_apply": "unsupported",
+    "end_discovery": "unsupported",
+    "end_proposal_apply": "unsupported",
+    "wrong_digest_rejected": "unsupported",
+    "stale_target_rejected": "unsupported",
+    "memory_separation": "unsupported",
+    "unrelated_sentinel": "unsupported",
+    "hook_example": "unsupported",
+    "setup_lifecycle": "failed",
+    "run": "failed"
+  },
+  "commands": [
+    {
+      "argv": [
+        "[PATH]",
+        "--version"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 1.965,
+      "stdout": "Hermes Agent v0.21.5 (2026.9.24)\nInstall directory: [PATH]\nInstall method: git\nPython: 3.11.16\nOpenAI SDK: 2.24.0\nUpdate available: 4533 commits behind \u2014 run 'hermes update'\n",
+      "stderr": "",
+      "at": "2026-09-29T06:16:32.537968+00:00"
+    },
+    {
+      "argv": [
+        "[PATH]",
+        "skills",
+        "trust",
+        "[PATH]"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 1.034,
+      "stdout": "Trusted: [PATH]\n10 project skill(s) will load in sessions started inside this repo (they take precedence over same-named profile skills).\n",
+      "stderr": "",
+      "at": "2026-09-29T06:16:35.515129+00:00"
+    },
+    {
+      "argv": [
+        "[PATH]",
+        "chat",
+        "-Q",
+        "--format",
+        "stream-json",
+        "--source",
+        "tool",
+        "-m",
+        "[REDACTED]:free",
+        "--provider",
+        "openrouter",
+        "--run-budget",
+        "180",
+        "--max-turns",
+        "1",
+        "-t",
+        "none",
+        "-s",
+        "context-setup",
+        "-q",
+        "Report only the fixture canary values already supplied in the repository instructions and the preloaded skill instructions. Do not execute the workflow. No tools are available for this instruction-delivery control."
+      ],
+      "exit_code": 0,
+      "duration_seconds": 19.74,
+      "stdout": "[stream-json events recorded separately]",
+      "stderr": "\nsession_id: 20260928_231638_91c68d\n",
+      "at": "2026-09-29T06:16:56.131596+00:00",
+      "events": [
+        {
+          "type": "startup_notice",
+          "text": "Warning: Unknown toolsets: none"
+        },
+        {
+          "type": "system",
+          "subtype": "init",
+          "model": "[REDACTED]:free",
+          "session_id": "20260928_231638_91c68d",
+          "timestamp": 1790662598954
+        },
+        {
+          "type": "result",
+          "session_id": "20260928_231638_91c68d",
+          "exit_code": 0,
+          "text": "Fixture canary values from the supplied context:\n\n- **AGENTS.md (repository instructions)**: `a60bab0692c7c3d6c3536aa6e27d4648`\n- **context-setup skill instructions**: `16e50f2399931b863948716ca1b19a72`\n- **MEMORY (personal notes)**: `b6568e6f11bd3238e7cb0ad8e92f909d`\n- **USER PROFILE**: `da479fb9c0f042422260e1bcc0bdc3c1`",
+          "tokens": {
+            "input": 4227,
+            "output": 416,
+            "total": 4643,
+            "cache_read": 0,
+            "cache_write": 0
+          },
+          "duration_ms": 16656,
+          "timestamp": 1790662615611
+        },
+        {
+          "type": "text",
+          "text": "Fixture canary values from the supplied context:\n\n- **AGENTS.md (repository instructions)**: `a60bab0692c7c3d6c3536aa6e27d4648`\n- **context-setup skill instructions**: `16e50f2399931b863948716ca1b19a72`\n- **MEMORY (personal notes)**: `b6568e6f11bd3238e7cb0ad8e92f909d`\n- **USER PROFILE**: `da479fb9c0f042422260e1bcc0bdc3c1`",
+          "joined_deltas": true
+        }
+      ]
+    },
+    {
+      "argv": [
+        "[PATH]",
+        "chat",
+        "-Q",
+        "--format",
+        "stream-json",
+        "--source",
+        "tool",
+        "-m",
+        "[REDACTED]:free",
+        "--provider",
+        "openrouter",
+        "--run-budget",
+        "180",
+        "--max-turns",
+        "20",
+        "-s",
+        "context-setup",
+        "-q",
+        "Create a kernel proposal for a synthetic fixture identity. Stop after creating the proposal."
+      ],
+      "exit_code": 124,
+      "duration_seconds": 210.014,
+      "stdout": "[stream-json events recorded separately]",
+      "stderr": "timed out",
+      "at": "2026-09-29T06:20:27.027829+00:00"
+    }
+  ],
+  "skill_source_sha256": {
+    "setup": "2e3e51fe34993fa25fd9212b96a02b04a2c2106ef70014a0ac2afa5e422bac0a",
+    "context-setup": "8f3c762531494252506bf0fbf4a201b49da1f0d7dea38a06ea746d309e0223d6",
+    "start": "ffc08638e810cc81b71a31c6f59cc987dde00e04cf29434508ea0307b475431a",
+    "context-start": "77d9230b2a6131d52fb72c6e0360b3d324c92bb5d1e5e3eaf9bba3409c7d22d4",
+    "update": "8b6911e49997dfcf39f0ff3ceaadba57561e4f08c9ee7d194fa0ce0ce789d598",
+    "context-update": "e6df6087081db3db0831b800792b501385f304472bdd2ed6b0c64643e572a4eb",
+    "end": "2c012b1d9f4c171065614094e68d1531e5de84850dcdb27fdac9d333f1254968",
+    "context-end": "47f0856a8ee0a37cd305397f7fdf5ff7966e805ce0fe6178fa92a0b11254b296"
+  },
+  "environment_names": [
+    "APPDATA",
+    "HERMES_GIT_BASH_PATH",
+    "HERMES_HOME",
+    "LOCALAPPDATA",
+    "OPENROUTER_API_KEY",
+    "PATH",
+    "PYTHONDONTWRITEBYTECODE",
+    "SYSTEMDRIVE",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "WINDIR"
+  ],
+  "api_key_names": [
+    "OPENROUTER_API_KEY"
+  ],
+  "version": "Hermes Agent v0.21.5 (2026.9.24)",
+  "failure": "HarnessError: setup chat failed or timed out",
+  "finished_at": "2026-09-29T06:20:27.028737+00:00"
+}

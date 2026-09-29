@@ -1,13 +1,14 @@
-# Cursor experimental adapter
+# Cursor adapter
 
-Context OS supports Cursor as two separate experimental surfaces: the desktop
-IDE and the Agent CLI. Both discover the repository-root `AGENTS.md` and project
+Context OS supports Cursor Agent CLI as a first-class surface. The desktop IDE
+remains experimental. Both discover the repository-root `AGENTS.md` and project
 skills under `.agents/skills/`, but they have different binaries, permissions,
 configuration, and conformance gates. A green CLI check is not IDE evidence.
 
-No installed-version conformance pass is recorded for this release. The descriptor is
-therefore capability-gated, has no tested version, and must not be promoted to
-first-class until the opt-in controls pass against exact IDE and CLI versions.
+CLI promotion is scoped to `2026.09.28-64d2043` on Windows, with host controls,
+the shipped setup/start/update/end workflows, exact-digest operator apply,
+and fresh-session handoff recorded in the [promotion evidence](../../docs/evidence/runtime-promotion-2026-09-29/README.md).
+It does not promote the IDE or establish parity on untested platforms.
 
 ## Setup
 
@@ -22,8 +23,9 @@ bash scripts/setup.sh --agents claude,codex,cursor
 For the IDE, open this repository as the workspace. For the CLI, install the
 Cursor Agent CLI separately, start `agent` from the repository root, and verify
 the exact executable with `agent --version`. The executable name `agent` is too
-generic for safe automatic detection, so the experimental descriptor does not
-use it as a resolution-only availability probe. Setup registers the adapter but
+generic for safe automatic detection. Doctor probes the unambiguous
+`cursor-agent` alias; if your installation provides only `agent`, verify its
+exact path manually. Setup registers the adapter but
 does not launch either surface, authenticate Cursor, trust the workspace, or
 change account, user, project, MCP, hook, sandbox, or permission settings.
 
@@ -111,13 +113,15 @@ only through a reviewed Context OS proposal.
 ## Diagnostics and promotion gates
 
 Run `bash scripts/contextos.sh doctor --runtime cursor` for descriptor,
-registration, materialization, and local binary checks. Its aggregate
-availability status reflects only the safely identifiable `cursor` IDE launcher;
-the generic `agent` CLI name has no resolution-only probe. Cursor has no
+registration, materialization, and local binary checks. It probes the `cursor`
+IDE launcher and `cursor-agent` CLI alias separately. Aggregate availability is
+`available` when both resolve and `mixed` when only one resolves; resolution
+does not establish working authentication or conformance. The generic `agent`
+CLI name has no resolution-only probe. Cursor has no
 documented all-up native doctor. For the CLI, record `agent --version`, `agent
 about`, `agent status`, and `agent mcp list` separately from IDE diagnostics.
 
-The current opt-in CLI control is an exact-version and required-flag smoke test,
+The lightweight opt-in CLI control is an exact-version and required-flag smoke test,
 not installed lifecycle conformance. It runs from a disposable directory and
 does not authenticate, trust a workspace, call a model, or exercise writes.
 
@@ -198,13 +202,14 @@ Project-owned `.cursor/` configuration is permitted by workspace validation.
 Strict maintainer validation still requires every template-owned path to have
 an explicit component owner.
 
-First-class promotion requires exact-version conformance for both surfaces,
+Each surface's first-class promotion requires its own exact-version conformance,
 including root and nested instruction discovery, `.cursor/rules` conflict
 controls, short-alias versus built-in resolution, the shipped explicit-only
 skill frontmatter, interactive must-fire and must-not-fire approval controls,
 headless ask, no-`--force`, and `--force` behavior, deny precedence, MCP scope,
 native-state isolation, and either a tested Cursor-specific hook adapter or a
-continuing explicit no-hook claim.
+continuing explicit no-hook claim. The runtime's overall tier reflects its
+strongest surface; a passing CLI does not satisfy the IDE's interactive controls.
 
 ### September 26, 2026 IDE operator run (diagnostic)
 
@@ -217,13 +222,15 @@ before any approval prompt, and Review, Keep, and Undo came only afterwards.
 Cursor then updated itself to `3.22.7` on exit, so `record` refused the run.
 The IDE surface remains unverified.
 
-### September 26, 2026 CLI conformance
+### CLI lifecycle conformance
 
 The separate `adapters/cursor/lifecycle_conformance.py` exercises the shipped
 four lifecycle skills in a disposable clone. It checks read-only start,
 proposal-only mutation turns, operator-approved exact-digest apply and receipts,
 wrong and stale digest rejection, exact applied content, unrelated-file
-preservation, and a fresh session reading the saved handoff. Run it from a clean
+preservation, Git control metadata, and a fresh session reading the saved handoff.
+The clone has no source remote. This is a disposable test fixture, not an OS
+sandbox. Run it from a clean
 commit with `--binary`, `--expected-version`, `--source-sha`, `--evidence`, an
 empty external `--approval-dir`, and `--allow-model-traffic`. Review each
 `<phase>.review.txt`, then write only its exact approved digest, with no newline,
@@ -232,19 +239,21 @@ to `<phase>.approve`. On Windows, use
 add a newline or incompatible encoding. It never supplies approval itself. Host permission controls
 remain the responsibility of `live_conformance.py`; both artifacts are needed.
 
+### September 26, 2026 CLI conformance
+
 CLI `2026.09.26-dd393fe` passed all 14 live controls from source commit
 `281c859` ([evidence](../../docs/evidence/cursor-cli-2026-09-26/README.md)).
 That commit fixed the deny-precedence parser. The client reports a denied file
 write as `editToolCall` with a `writePermissionDenied` result, and the harness
 had been looking for a different event shape. This is CLI evidence only. The
-IDE surface still needs an uncontaminated operator run, so support remains
-experimental.
+IDE surface still needs an uncontaminated operator run. Overall support was
+experimental at the time of this earlier evidence.
 
 ### September 24, 2026 live diagnostics
 
 These observations used clean source commit
 `4ea28a6901d168b884f6c8621d90a1f897b4e99f`; they are failed or incomplete
-diagnostics, not passing conformance artifacts. Support remains experimental.
+diagnostics, not passing conformance artifacts. Support was experimental at that time.
 
 - CLI `2026.09.23-86fc751`: the first run failed the exact nested canary.
   A second run passed that control, then stopped because the denial stream did

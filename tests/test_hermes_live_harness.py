@@ -275,6 +275,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
             copy_tracked_fixture(ROOT, new_fixture, source_sha)
             subprocess.run(["git", "init", "--quiet"], cwd=new_fixture, check=True)
             subprocess.run(["git", "config", "core.autocrlf", "false"], cwd=new_fixture, check=True)
+            subprocess.run(["git", "remote", "add", "origin", str(ROOT)], cwd=new_fixture, check=True)
             return {"exit_code": 0}
         with mock.patch.object(live, "git", side_effect=clean_git), mock.patch.object(live, "command", side_effect=clone), mock.patch.object(live, "outside_checkouts"):
             prepared = live.prepare(ROOT, new_fixture, new_home, source_sha)
@@ -283,6 +284,7 @@ class HermesLiveHarnessTest(unittest.TestCase):
         self.assertEqual(set(live.SKILLS), set(manifest["skill_source_sha256"]))
         self.assertEqual(set(live.PHASES), set(manifest["prompts"]))
         self.assertTrue(new_home.is_dir())
+        self.assertEqual("", real_git(new_fixture, "remote"))
         self.assertEqual(manifest["fixture_commit"], real_git(new_fixture, "rev-parse", "HEAD"))
         self.assertNotEqual(source_sha, manifest["fixture_commit"])
         self.assertFalse((new_fixture / ".context-os-live-manifest.json").exists())

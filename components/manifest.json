@@ -915,6 +915,66 @@
                 {
                     "path": "tests/test_continuity_benchmark.py",
                     "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-release-baseline.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-1.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-2.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-3.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-lifecycle-4.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-1.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-2.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-3.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-4.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-5.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-6.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/reviews.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/hermes-live-7.json",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/runtime-promotion-2026-09-29/cursor-host-5da7b9b.json",
+                    "policy": "development"
                 }
             ]
         },
@@ -1242,7 +1302,7 @@
         },
         {
             "id": "hermes-adapter",
-            "description": "Hermes installation guidance, live conformance harness, optional hooks, and runtime descriptor.",
+            "description": "First-class Hermes CLI installation, live conformance, optional advisory hooks, and runtime descriptor.",
             "depends_on": [
                 "core",
                 "portable-skills",
@@ -1383,7 +1443,7 @@
         },
         {
             "id": "cursor-adapter",
-            "description": "Experimental Cursor IDE and CLI onboarding, runtime descriptor, and capability-gated conformance controls.",
+            "description": "First-class Cursor CLI and experimental IDE onboarding, runtime descriptor, and conformance controls.",
             "depends_on": [
                 "core",
                 "portable-skills",

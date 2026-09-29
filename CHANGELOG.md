@@ -5,10 +5,15 @@
 ### Changed
 - Hermes live conformance separates tool-free instruction delivery from normal
   lifecycle execution, while preserving the combined discovery mode for
-  reproducing earlier evidence (#163).
+  reproducing earlier evidence (#163). Hermes `v0.21.5 (2026.9.24)` passed the
+  complete live lifecycle with Gemini 3.8 Flash through OpenRouter on Windows
+  and is first-class. Hooks remain advisory and interactive slash routing
+  remains outside the recorded single-query evidence.
 - Cursor CLI has a separate end-to-end lifecycle conformance runner with
   operator-reviewed apply, rejection controls, and fresh-session continuity
-  checks (#73). Support promotion still requires passing live evidence.
+  checks (#73). Agent CLI `2026.09.28-64d2043` passed the lifecycle on Windows
+  and is first-class; the IDE remains experimental. Doctor probes the
+  unambiguous `cursor-agent` executable separately from the IDE.
 
 ---
 

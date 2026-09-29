@@ -1,9 +1,12 @@
 # Hermes adapter
 
-This adapter is experimental in v0.12. Deterministic repository, kernel, skill,
-and hook conformance passes, but the installed Hermes 0.20.5 client did not
-complete model inference during the retained live run. That attempt is not
-counted as installed-client conformance.
+Hermes CLI is first-class with installed-client evidence for Hermes Agent
+`v0.21.5 (2026.9.24)` on Windows using `google/gemini-3.8-flash` through
+OpenRouter. The [live lifecycle run](../../docs/evidence/runtime-promotion-2026-09-29/README.md)
+passed explicit skill preloading, all four phases, reviewed exact-digest apply,
+receipts, rejection controls, and native-memory separation. Optional hooks
+remain advisory; interactive slash routing and short aliases are not promoted
+by this single-query evidence. Provider availability is a separate prerequisite.
 
 Run `bash scripts/contextos.sh install --runtime hermes` from the repository root.
 The primary skill path is the repository-local `.agents/skills/` directory.
@@ -24,7 +27,7 @@ aliases installed; their invocation still needs a live control.
 
 ## Live conformance
 
-The first recorded attempts, and why none passed, are in
+Earlier failed attempts are retained in
 [`docs/evidence/hermes-live-2026-09-23/`](../../docs/evidence/hermes-live-2026-09-23/README.md).
 
 From a clean, reviewed source commit, choose new sibling paths outside any
@@ -34,13 +37,20 @@ Context OS checkout and run:
 python adapters/hermes/live_conformance.py prepare --source . --expected-commit <full-sha> --fixture <new-fixture> --home <new-hermes-home>
 ```
 
-Follow the printed manifest. Set `HERMES_HOME` to the new home, supply provider
+Follow the printed manifest. The disposable clone has its source remote removed.
+Set `HERMES_HOME` to the new home, supply provider
 credentials through environment variables, and run from the source checkout.
 Do not copy a profile, credentials, or native memory into the fixture:
 
 ```sh
-python adapters/hermes/live_conformance.py record --fixture <fixture> --home <new-hermes-home> --manifest <manifest-path> --evidence <new-evidence.json> --binary <hermes-executable> --model <model-id> --provider <provider> --expected-version 'Hermes Agent v0.21.4' --run-budget 120 --max-turns 20
+python adapters/hermes/live_conformance.py record --fixture <fixture> --home <new-hermes-home> --manifest <manifest-path> --evidence <new-evidence.json> --binary <hermes-executable> --model <model-id> --provider <provider> --expected-version 'Hermes Agent v0.21.5' --run-budget 300 --max-turns 40
 ```
+
+Before `record`, set `auth.adopt_external_logins: false` in the fresh home's
+`config.yaml` so the fixture does not adopt another CLI's authenticated session.
+The passing run used the local terminal backend and provider credentials from
+the environment. The 40-turn budget allows normal instruction reads before
+proposal creation; a turn-limit summary is not a passing lifecycle response.
 
 `prepare` places two synthetic native-memory canaries under the fresh
 `HERMES_HOME/memories/` path described by [Hermes memory documentation](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/memory.md).

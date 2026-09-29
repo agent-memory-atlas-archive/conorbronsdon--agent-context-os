@@ -489,6 +489,7 @@ def prepare(source: Path, fixture: Path, home: Path, expected_commit: str,
     cloned = command(["git", "clone", "--local", "--no-hardlinks", "--quiet", str(source), str(fixture)], source)
     if cloned["exit_code"] or git(fixture, "rev-parse", "HEAD") != expected_commit:
         raise HarnessError("could not clone the exact clean source commit")
+    git(fixture, "remote", "remove", "origin")
     (fixture / MARKER).write_text("disposable\n", encoding="utf-8")
     (fixture / "unrelated-sentinel.txt").write_bytes(secrets.token_bytes(64))
     canaries = {"agents": secrets.token_hex(16)}

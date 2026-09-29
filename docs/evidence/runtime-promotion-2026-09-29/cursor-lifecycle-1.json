@@ -1,0 +1,61 @@
+{
+  "runtime": "cursor",
+  "surface": "cli",
+  "source_sha": "11ffb51b167543719bad88cd1b73ec44d0261f39",
+  "controls": {
+    "preflight": "passed",
+    "setup": "failed",
+    "run": "failed"
+  },
+  "operator": "external-exact-digest",
+  "os": "Windows-11-10.0.26200-SP0",
+  "model_selection": "Cursor configured default",
+  "started_at": "2026-09-29T06:04:19.541350+00:00",
+  "prompts": {
+    "setup": "/context-setup This is an explicitly authorized synthetic lifecycle fixture. Use the colocated repository. Audience confirmed: synthetic public fixture only. Use identity/lifecycle-fixture.md containing '# Synthetic lifecycle identity\\n\\nThe fixture tests portable continuity.\\n'. For mutations, create exactly one kernel proposal, display its diff and digest, then stop. Do not apply, commit, push, or modify other files. Use .context-os/inputs for payloads. Do not use host-native memory as input."
+  },
+  "phases": {},
+  "kernel_commands": [],
+  "limits": [
+    "No IDE, hook, MCP execution, or native-memory claim.",
+    "Scoped to the recorded client, model selection, and operating system."
+  ],
+  "failure_type": "TimeoutExpired",
+  "host": {
+    "expected_version": "2026.09.28-64d2043",
+    "source_sha": "11ffb51b167543719bad88cd1b73ec44d0261f39",
+    "binary_version": "2026.09.28-64d2043",
+    "binary_name": "agent.cmd",
+    "binary_sha256": "299eaddf3327768e7fcd64f29ad01747c740f7e316931575fb3cee617c92ccfc",
+    "workspace_cleanup": "completed",
+    "commands": [
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "c8c459b021d9cd0a5e9671f0609ee0f631ba2e34a7dac404abbf08b8cb37a326",
+        "returncode": 0,
+        "stdout_sha256": "cd435d4f8034a16a4fafc1a5cb7f24d248455352c37717697a0475bf371bbdd4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "80c5f326e40ab6b4716400249cdaeaee756cf8dd209f548f0a3a3c71ef65b58c",
+        "returncode": 0,
+        "stdout_sha256": "2b173a18098fdeca23d4084b5d29af4e19e974eaa541906ae0d03b6a5df70b3a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "cmd.exe",
+        "argv_sha256": "abd1298b805e913743acd7d835e8f593b10e8ef6638a394ac4ff90b5d3e7d68d",
+        "returncode": 0,
+        "stdout_sha256": "597220d5e2f8d15dbb9ed65208e5c3211855aa0b8460f03d94766e37422a3859",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "controls": {
+      "exact_version": true,
+      "required_flags": true,
+      "authenticated": true
+    }
+  },
+  "finished_at": "2026-09-29T06:10:08.181042+00:00"
+}

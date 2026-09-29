@@ -1,6 +1,7 @@
 # Context OS launch copy
 
-Drafts only. Review links, release status, and platform length before publishing.
+Historical v0.13 drafts only. Use the [current support table](../README.md#host-support)
+for current runtime tiers. Review links, release status, and platform length before publishing.
 
 ## Main announcement
 

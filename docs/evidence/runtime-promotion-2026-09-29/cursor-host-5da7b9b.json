@@ -1,0 +1,107 @@
+{
+  "binary_name": "agent.cmd",
+  "binary_sha256": "299eaddf3327768e7fcd64f29ad01747c740f7e316931575fb3cee617c92ccfc",
+  "binary_version": "2026.09.28-64d2043",
+  "checked_at": "2026-09-29T06:52:34.320348+00:00",
+  "commands": [
+    {
+      "argv_sha256": "c8c459b021d9cd0a5e9671f0609ee0f631ba2e34a7dac404abbf08b8cb37a326",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cd435d4f8034a16a4fafc1a5cb7f24d248455352c37717697a0475bf371bbdd4"
+    },
+    {
+      "argv_sha256": "80c5f326e40ab6b4716400249cdaeaee756cf8dd209f548f0a3a3c71ef65b58c",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2b173a18098fdeca23d4084b5d29af4e19e974eaa541906ae0d03b6a5df70b3a"
+    },
+    {
+      "argv_sha256": "abd1298b805e913743acd7d835e8f593b10e8ef6638a394ac4ff90b5d3e7d68d",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "597220d5e2f8d15dbb9ed65208e5c3211855aa0b8460f03d94766e37422a3859"
+    },
+    {
+      "argv_sha256": "a23879487d81f31659f2bf52bff8989725648413304c374f8ef236b7050e44b2",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0946ec781ff0545cccbee7f17e9cb377e0e98d5900d1466cd5f2c6c7ebe1241f"
+    },
+    {
+      "argv_sha256": "ec2fc016f4857f6a9d81504f6a912aa99db96c8d82e6aec5b921c961eb4c22ce",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c74ea8e98874e1fa87ace4966364ae755dd52401a9e1b467d620d0aa895d734e"
+    },
+    {
+      "argv_sha256": "154b53134013e017a4aa9114d20aea39a93096e765c220179922111c8dc671e6",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "987db17282f0e24b287e205c6d6ea329a2e2964a78ba14cc24e8c88c6424ecba"
+    },
+    {
+      "argv_sha256": "0018bb7c24d6e2f76eb00b075575f5611557e4b629cc012ecbc0464810115c54",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "71affcdaf40d3e9324b95eb2c7427844fa47bc6a5aab4ea67fb045ea8fe3a5f4"
+    },
+    {
+      "argv_sha256": "2a0203cca8bfb3d42d251dd36c4f2bf301f67715497a632557b08687f47aaa10",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "870e2901e6fcbf9fecbab0372dd8dcbd7e81ab5faa0972a07e74a1d04ebfa5a2"
+    },
+    {
+      "argv_sha256": "2474859eba4cf3aff4f4faf553bb4270d03d96041081dac99ac8db3ae4b24c47",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d93e0f61d0802333cdfe114057af86c6cf988f43856e55c39c4c3eaf4a12ee40"
+    },
+    {
+      "argv_sha256": "a47c2c2bbed669942a065441f4d1c6a7a4eda5ce158117aaf7e32e26f0c4e78c",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "985889d719f2bb6e4df1d933c7ee45b35b00c324270efe4117da0f4aa80e9a8d"
+    },
+    {
+      "argv_sha256": "1f84ff10401f9f1be9ada47fc1790a794d5e4918234c1a87a452f839064e13d5",
+      "command": "cmd.exe",
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "86767e871212b975be40accc411ca3dc2cf8efe193ea05422adf299be276932c"
+    }
+  ],
+  "controls": {
+    "authenticated": true,
+    "deny_precedes_force": true,
+    "exact_version": true,
+    "explicit_skill_must_fire": true,
+    "forced_write_is_scoped": true,
+    "headless_ask_mode_preserves_files": true,
+    "headless_without_force_is_write_capable": true,
+    "implicit_skill_must_not_fire": true,
+    "nested_instruction_discovery": true,
+    "project_deny_rejected_a_write_attempt": true,
+    "real_workspace_not_used": true,
+    "required_flags": true,
+    "root_instruction_discovery": true,
+    "short_update_alias_not_invoked": true
+  },
+  "expected_version": "2026.09.28-64d2043",
+  "runtime": "cursor",
+  "schema_version": 1,
+  "source_sha": "5da7b9bfbf3f3f25475a4ea371cfdae848edf78e",
+  "surface": "cli",
+  "workspace_cleanup": "completed"
+}
