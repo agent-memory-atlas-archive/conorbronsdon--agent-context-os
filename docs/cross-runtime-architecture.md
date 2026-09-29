@@ -33,6 +33,12 @@ kernel contract while WorkingRoot remains read-only lifecycle evidence.
 6. **Conformance:** dependency-light tests assert exact state transitions;
    opt-in launch tests exercise installed host discovery without hiding skips.
 
+The [ACP connection foundation](../adapters/acp/README.md) prepares shared message
+handling for Cursor and Hermes app clients. Its synthetic protocol tests do not
+establish installed-runtime support. ACP connection mode, desktop IDE behavior,
+and ordinary CLI behavior require separate evidence even when they use the same
+portable skills and kernel.
+
 ## Commands
 
 ```text

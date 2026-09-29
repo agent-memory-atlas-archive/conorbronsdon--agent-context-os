@@ -8,6 +8,11 @@ receipts, rejection controls, and native-memory separation. Optional hooks
 remain advisory; interactive slash routing and short aliases are not promoted
 by this single-query evidence. Provider availability is a separate prerequisite.
 
+The [shared ACP connection foundation](../acp/README.md) is offline-tested only.
+Hermes ACP and app integration require separate installed-client evidence; the
+CLI tier does not promote them. No ACP dependency or global configuration is
+installed by this foundation.
+
 Run `bash scripts/contextos.sh install --runtime hermes` from the repository root.
 The primary skill path is the repository-local `.agents/skills/` directory.
 For an isolated fixture, set a fresh `HERMES_HOME` and run `hermes skills trust

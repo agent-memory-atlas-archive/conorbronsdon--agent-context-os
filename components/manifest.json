@@ -657,6 +657,18 @@
                     "policy": "development"
                 },
                 {
+                    "path": "adapters/acp/README.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "adapters/acp/protocol.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "tests/test_acp_protocol.py",
+                    "policy": "development"
+                },
+                {
                     "path": "tests/test_runtime_launch.py",
                     "policy": "development"
                 },

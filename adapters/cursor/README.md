@@ -220,13 +220,30 @@ Strict maintainer validation still requires every template-owned path to have
 an explicit component owner.
 
 Each surface's first-class promotion requires its own exact-version conformance,
-including root and nested instruction discovery, `.cursor/rules` conflict
-controls, short-alias versus built-in resolution, the shipped explicit-only
-skill frontmatter, interactive must-fire and must-not-fire approval controls,
-headless ask, no-`--force`, and `--force` behavior, deny precedence, MCP scope,
-native-state isolation, and either a tested Cursor-specific hook adapter or a
-continuing explicit no-hook claim. The runtime's overall tier reflects its
-strongest surface; a passing CLI does not satisfy the IDE's interactive controls.
+scoped to the workflow and capabilities it actually promises. The required
+lifecycle controls are instruction and explicit skill discovery, read-only start,
+proposal-only setup/update/end, operator-reviewed exact-digest apply, wrong and
+stale digest rejection, receipts, unrelated-file preservation, and a fresh session
+recovering the saved repository handoff. Record source SHA, host version, model,
+and invocation path. Review the implementation and evidence before promotion.
+
+Characterize host capabilities separately: root/nested discovery and rule
+conflicts, short-alias collisions, automatic native skill invocation, ordinary
+skill-file reads, file edits, shell approvals, MCP scope, and native-state
+isolation. Run CLI headless ask, no-`--force`, `--force`, and deny-precedence
+controls for CLI claims. Run interactive must-fire and must-not-fire controls
+for each IDE approval claim. A skill-file read does not establish native automatic
+invocation; immediate file edits do not establish shell-approval behavior.
+Unverified capabilities stay unverified, with an explicit no-hook and no-memory-
+bridge claim until their own adapters pass conformance.
+
+This capability-scoped contract does not turn earlier failed host controls into
+passes. The strict recorder retains its existing checks; its diagnostic output
+cannot promote a surface. The IDE remains experimental pending review of the
+bounded lifecycle evidence and remaining invocation/discovery limits. The
+runtime's overall tier reflects its strongest surface; CLI evidence cannot
+promote the IDE. The [ACP connection foundation](../acp/README.md) is a separate,
+offline-tested integration path; its live app test remains deferred.
 
 ### September 26, 2026 IDE operator run (diagnostic)
 
