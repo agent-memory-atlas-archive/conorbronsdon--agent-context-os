@@ -5,6 +5,8 @@
 ## [1.0.0] — 2026-09-29 — Reviewed handoffs and stable interfaces
 
 ### Fixed
+- Final release onboarding qualification uses the selected Codex content runtime
+  rather than the reserved generic materialization runtime.
 - Release-note documentation links use the 1.0 tag so they resolve from both
   the source file and GitHub's rendered release page.
 - Release qualification fixtures follow the copied kernel's version. Diagnostic

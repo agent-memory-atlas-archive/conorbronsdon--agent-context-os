@@ -88,7 +88,7 @@ def main():
     (out / 'synthetic-approval.json').write_text(json.dumps({'synthetic': True, 'human_authenticated': False,
         'digest': proposal['proposal_digest'], 'changes': proposal_document['changes']}, indent=2), encoding='utf-8')
     receipt = json.loads(run('setup-apply', [sys.executable, '-m', 'contextos', 'apply', proposal['proposal'],
-        '--confirm', proposal['proposal_digest'], '--runtime', 'generic'], cwd=workspace))
+        '--confirm', proposal['proposal_digest'], '--runtime', 'codex'], cwd=workspace))
     assert receipt['proposal_digest'] == proposal['proposal_digest']
     start = json.loads(run('start', [sys.executable, '-m', 'contextos', 'start'], cwd=workspace))
     assert start['initialized'] is True
