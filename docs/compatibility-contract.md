@@ -1,7 +1,7 @@
 # Compatibility contract for 1.0
 
-Status: proposed for the 1.0 release. This document defines the compatibility
-promise to qualify before publication; the current product version is 0.15.0.
+Status: the compatibility promise for 1.0.0, effective when the qualified
+release is published. Source version 1.0.0 is a candidate until that publication.
 The release tracker is [#228](https://github.com/conorbronsdon/agent-context-os/issues/228).
 
 ## Supported interfaces

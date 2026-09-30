@@ -1031,6 +1031,22 @@
                 {
                     "path": "docs/evidence/upgrade-preflight-2026-09-29/report.md",
                     "policy": "development"
+                },
+                {
+                    "path": "scripts/qualify-release-migration.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "scripts/qualify-release-recovery.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "scripts/qualify-release-upgrades.py",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/releases/v1.0.0.md",
+                    "policy": "managed"
                 }
             ]
         },

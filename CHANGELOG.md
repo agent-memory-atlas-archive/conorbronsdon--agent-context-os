@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-09-29 — Reviewed handoffs and stable interfaces
+
 ### Fixed
 - Release-template runtime registration and scoped doctor checks no longer
   require omitted maintainer evidence files. Operational instruction, skill and
@@ -10,17 +12,20 @@
   populated names or remote URLs do not retain a carriage return.
 
 ### Added
+- Release candidate qualification executes published 0.14/0.15 migration and
+  recovery controls independently on Linux and Windows before draft staging.
 - Published 0.14/0.15 bundle preflight notes record conflict refusal, reconcile,
   exact rollback and process-exit journal recovery on Windows, with final
   release qualification explicitly outstanding.
 - Redacted synthetic handoff observations cover newcomer, returning-session and
   reject/revise scenarios with separate fresh receiving agents.
-- A proposed 1.0 compatibility contract names the supported lifecycle, workspace,
+- The 1.0 compatibility contract names the supported lifecycle, workspace,
   proposal/receipt, adapter and bundle interfaces, plus migration, deprecation
   and recovery requirements (#228).
 
 ### Changed
-- The README release onboarding path now points to published v0.15.0 assets.
+- Release onboarding points to the qualified v1.0.0 template; candidate source
+  stays distinct from a published release.
 - The first-handoff guide starts from that verified release and initializes an
   independent Git boundary before setup.
 - Lifecycle tables explicitly separate first-class Cursor CLI from experimental
