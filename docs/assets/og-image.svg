@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
-  <!-- Render at 1280 by 640 with Inkscape into docs/assets/og-image.png. -->
+  <!-- Render this vector at 1280 by 640; both PNG previews share this source. -->
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#090d1a"/>
@@ -36,10 +36,11 @@
   </g>
 
   <g font-family="DejaVu Sans Mono, monospace">
-    <text x="74" y="411" font-size="15" font-weight="700" letter-spacing="1.5" fill="#5de1e6">FIRST-CLASS</text>
-    <text x="74" y="445" font-size="21" fill="#e5e9f5">Claude Code · Codex · OpenClaw · OpenCode</text>
-    <text x="74" y="500" font-size="15" font-weight="700" letter-spacing="1.5" fill="#9b7bff">EXPERIMENTAL</text>
-    <text x="74" y="534" font-size="21" fill="#aeb8d2">Hermes Agent · Cursor · Devin</text>
+    <text x="74" y="401" font-size="15" font-weight="700" letter-spacing="1.5" fill="#5de1e6">FIRST-CLASS CLI</text>
+    <text x="74" y="435" font-size="21" fill="#e5e9f5">Claude Code · Codex · OpenClaw · OpenCode</text>
+    <text x="74" y="469" font-size="21" fill="#e5e9f5">Hermes Agent · Cursor CLI</text>
+    <text x="74" y="512" font-size="15" font-weight="700" letter-spacing="1.5" fill="#9b7bff">EXPERIMENTAL</text>
+    <text x="74" y="546" font-size="21" fill="#aeb8d2">Cursor IDE · Devin</text>
     <text x="74" y="596" font-size="18" fill="#7f8aa8">github.com/conorbronsdon/agent-context-os</text>
   </g>
 

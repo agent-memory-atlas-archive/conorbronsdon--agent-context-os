@@ -10,22 +10,22 @@ needed. See [getting started](getting-started.md) if a prerequisite is missing.
 ## 1. Set up one shared workspace
 
 Start with the five attached assets from
-[v0.15.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.15.0).
+[v1.0.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v1.0.0).
 Follow its `OFFLINE-VERIFY.md` before extracting or running setup. Use a fresh
 directory for this exercise. The attached template tar is the workspace;
 GitHub's generated source archives are different artifacts.
 
-The 0.15.0 template currently stops during runtime registration because its
-descriptor validation requires development files omitted from the archive.
-Until a fixed release ships, use the source alternative below for this exercise.
-The released assets can still be verified and inspected independently.
+The 1.0.0 template fixes the runtime-registration failure in 0.15.0. Source
+version 1.0.0 remains a candidate until the immutable release is published; use
+the source alternative below if that release is not available yet.
 
 After verification and extraction, initialize an independent Git repository so
 the exercise cannot inherit an enclosing repository's hooks or Git evidence:
 
 ```bash
-cd agent-context-os-template-v0.15.0
+cd agent-context-os-template-v1.0.0
 git init
+bash scripts/setup.sh --agents claude,codex
 ```
 
 For testing unreleased source instead, clone the development repository into a
@@ -40,9 +40,8 @@ bash scripts/setup.sh --agents claude,codex
 Record which
 source and version you tested; source-branch support may differ from the release.
 
-The CRLF setup-input fix and end-skill date-line clarification described in the
-synthetic report are development changes after 0.15.0. They are not in that
-release; the review and initialization checks below also apply to 0.15.0.
+Version 1.0.0 includes the CRLF setup-input fix and end-skill date-line
+clarification from the synthetic handoff observations.
 
 Review the agent-selection diff before approving it. Decline optional commits,
 remote changes, and hooks for this exercise. Launch `claude` from this directory,

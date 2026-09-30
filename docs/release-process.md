@@ -48,7 +48,7 @@ The administration-read policy endpoint is intentionally not called with an
 Actions `GITHUB_TOKEN`: GitHub does not grant that token repository
 administration permission. Do not put a personal admin token in workflow inputs,
 logs, repository secrets, or artifacts. The workflow uses the checked-in
-[v0.15.0 release notes](releases/v0.15.0.md) as the draft description.
+[v1.0.0 release notes](releases/v1.0.0.md) as the draft description.
 
 The workflow then fails closed through these gates:
 
@@ -59,7 +59,11 @@ The workflow then fails closed through these gates:
 3. build twice from its Linux Git index and compare every artifact byte;
 4. verify the same Actions candidate in separate Linux and Windows extraction
    jobs, including execution of `python -m contextos bundle check` from the
-   extracted archive;
+   extracted archive. Both jobs also exercise pinned published 0.14/0.15
+   upgrades, legacy and schema-v1 migrations, selected profiles, personalized
+   managed-file conflicts, multi-publication rollback, live child lock exclusion,
+   journal recovery, post-receipt doctor failure and fresh setup/readiness.
+   Synthetic fixtures and failure diagnostics are retained for seven days;
 5. only after both candidate jobs pass, create or confirm the exact lightweight
    tag through the GitHub API, classify the release-by-tag lookup by HTTP status,
    and create only after an exact 404; auth, network, rate-limit, and server
@@ -93,8 +97,8 @@ python scripts/publish-release.py \
   --run-id RUN_ID \
   --release-id RELEASE_ID \
   --commit REVIEWED_40_HEX_COMMIT \
-  --version 0.15.0 \
-  --tag v0.15.0
+  --version 1.0.0 \
+  --tag v1.0.0
 ```
 
 The publisher uses the existing locally authenticated `gh` session. Before the
@@ -107,7 +111,7 @@ irreversible numeric-release-ID PATCH, it requires all of the following:
   numeric artifact ID, checked against its server-reported ZIP size and digest,
   and re-read by ID before publication;
 - local `HEAD` and the target repository's GitHub API `main` and
-  `refs/tags/v0.15.0` equal the reviewed commit (the local `origin` is not an
+  `refs/tags/v1.0.0` equal the reviewed commit (the local `origin` is not an
   independent authority);
 - the operator-selected numeric release is still a draft, is not a prerelease,
   and has the exact
@@ -153,8 +157,8 @@ python scripts/publish-release.py \
   --run-id RUN_ID \
   --release-id RELEASE_ID \
   --commit REVIEWED_40_HEX_COMMIT \
-  --version 0.15.0 \
-  --tag v0.15.0 \
+  --version 1.0.0 \
+  --tag v1.0.0 \
   --verify-published
 ```
 
@@ -163,7 +167,7 @@ identity and attestation cross-check and never selects the PATCH target. This
 mode requires the numeric release to be published and immutable, repeats
 the run, attempt, artifact, repository-ref, metadata, byte, and attestation
 checks, and never issues a publication PATCH. Any post-publication integrity
-mismatch retires v0.15.0 rather than authorizing mutation.
+mismatch retires v1.0.0 rather than authorizing mutation.
 
 Consumers should follow the version-specific offline instructions and obtain
 the expected digest through a channel they trust. Co-located checksums prove
