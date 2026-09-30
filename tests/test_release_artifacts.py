@@ -325,13 +325,12 @@ class ReleaseArtifactTest(unittest.TestCase):
             workflow, re.MULTILINE | re.DOTALL,
         ))
         for name, job in jobs.items():
-            if "always()" not in job:
-                continue
-            self.assertIn(name, {"verify-candidate-linux", "verify-candidate-windows"})
             lines = job.splitlines()
             for index, line in enumerate(lines):
-                if "always()" in line:
+                if re.match(r"\s*if\s*:", line):
+                    self.assertIn(name, {"verify-candidate-linux", "verify-candidate-windows"})
                     self.assertEqual(line, "        if: always()")
+                    self.assertGreater(index, 0)
                     self.assertRegex(lines[index - 1], r"^      - uses: actions/upload-artifact@[0-9a-f]{40}")
         for name in ("stage-draft", "verify-draft-linux", "verify-draft-windows", "ready-to-publish"):
             self.assertIn(name, jobs)
@@ -340,10 +339,15 @@ class ReleaseArtifactTest(unittest.TestCase):
     def test_diagnostic_retention_cannot_allow_staging_after_failed_gates(self) -> None:
         workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
         self.assert_workflow_diagnostics_cannot_bypass_gates(workflow)
-        for name in ("stage-draft", "ready-to-publish"):
-            bypass = workflow.replace(f"  {name}:\n", f"  {name}:\n    if: always()\n")
-            with self.subTest(job=name), self.assertRaises(AssertionError):
-                self.assert_workflow_diagnostics_cannot_bypass_gates(bypass)
+        for name in ("build-linux", "verify-candidate-linux", "verify-candidate-windows",
+                     "stage-draft", "verify-draft-linux", "verify-draft-windows", "ready-to-publish"):
+            for condition in ("always()", "${{ !cancelled() }}", "failure()", "success() || failure()"):
+                bypass = workflow.replace(f"  {name}:\n", f"  {name}:\n    if: {condition}\n")
+                with self.subTest(job=name, condition=condition), self.assertRaises(AssertionError):
+                    self.assert_workflow_diagnostics_cannot_bypass_gates(bypass)
+        bypass = workflow.replace("        if: always()", "        if: ${{ !cancelled() }}")
+        with self.assertRaises(AssertionError):
+            self.assert_workflow_diagnostics_cannot_bypass_gates(bypass)
         bypass = workflow.replace(
             "      - name: Qualify published upgrades, recovery and fresh onboarding\n",
             "      - name: Qualify published upgrades, recovery and fresh onboarding\n        continue-on-error: true\n",
