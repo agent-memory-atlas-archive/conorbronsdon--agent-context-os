@@ -51,10 +51,14 @@ def snapshot(root):
 def main():
     args = parser().parse_args()
     product = args.product.resolve()
-    sys.path.insert(0, str(product))
+    # The orchestration verifies this archive before starting this process.
+    # Both parent and crash child execute its kernel, never checkout bytes.
+    candidate_source = args.candidate_source.resolve()
+    sys.path.insert(0, str(candidate_source))
     from contextos import kernel
     from contextos.cli import main as cli
     from contextos.bundle_schema import verify_bundle
+    assert Path(kernel.__file__).resolve().is_relative_to(candidate_source)
 
     if args.child:
         target, proposal_path, digest = args.child
