@@ -155,7 +155,10 @@ def _schema_string() -> dict[str, Any]:
 def validate_runtime_manifest(
     manifest: Any, *, runtime_id: str, root: Path, today: date | None = None,
     check_paths: bool = True,
+    check_evidence_paths: bool | None = None,
 ) -> dict[str, Any]:
+    if check_evidence_paths is None:
+        check_evidence_paths = check_paths
     if runtime_id == "generic" or not RUNTIME_ID_RE.fullmatch(runtime_id):
         _fail("runtime", f"invalid or reserved runtime id {runtime_id!r}")
     document = _exact_keys(manifest, TOP_LEVEL_KEYS, "manifest")
@@ -211,7 +214,7 @@ def validate_runtime_manifest(
             if parsed.scheme != "https" or not parsed.netloc:
                 _fail(f"{field}.location", "official evidence must be an absolute HTTPS URL")
         else:
-            _repo_path(root, location, f"{field}.location", must_exist=check_paths)
+            _repo_path(root, location, f"{field}.location", must_exist=check_evidence_paths)
         claims = _unique_strings(item.get("claims"), f"{field}.claims", minimum=1)
         for claim_index, claim in enumerate(claims):
             _enum(claim, EVIDENCE_CLAIMS, f"{field}.claims[{claim_index}]")
@@ -282,7 +285,7 @@ def validate_runtime_manifest(
         for index, conformance_test in enumerate(conformance_tests):
             _repo_path(
                 root, conformance_test, f"{field}.conformance_tests[{index}]",
-                must_exist=check_paths,
+                must_exist=check_evidence_paths,
             )
         evidence_ids = _unique_strings(surface.get("evidence"), f"{field}.evidence", minimum=1)
         unknown_evidence = sorted(set(evidence_ids) - set(source_claims))

@@ -9,11 +9,40 @@ needed. See [getting started](getting-started.md) if a prerequisite is missing.
 
 ## 1. Set up one shared workspace
 
+Start with the five attached assets from
+[v0.15.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.15.0).
+Follow its `OFFLINE-VERIFY.md` before extracting or running setup. Use a fresh
+directory for this exercise. The attached template tar is the workspace;
+GitHub's generated source archives are different artifacts.
+
+The 0.15.0 template currently stops during runtime registration because its
+descriptor validation requires development files omitted from the archive.
+Until a fixed release ships, use the source alternative below for this exercise.
+The released assets can still be verified and inspected independently.
+
+After verification and extraction, initialize an independent Git repository so
+the exercise cannot inherit an enclosing repository's hooks or Git evidence:
+
+```bash
+cd agent-context-os-template-v0.15.0
+git init
+```
+
+For testing unreleased source instead, clone the development repository into a
+new `handoff-demo` directory and run setup there:
+
 ```bash
 git clone https://github.com/conorbronsdon/agent-context-os.git handoff-demo
 cd handoff-demo
 bash scripts/setup.sh --agents claude,codex
 ```
+
+Record which
+source and version you tested; source-branch support may differ from the release.
+
+The CRLF setup-input fix and end-skill date-line clarification described in the
+synthetic report are development changes after 0.15.0. They are not in that
+release; the review and initialization checks below also apply to 0.15.0.
 
 Review the agent-selection diff before approving it. Decline optional commits,
 remote changes, and hooks for this exercise. Launch `claude` from this directory,
@@ -24,7 +53,12 @@ invoke `/setup`, and answer the interview with this fictional project:
 > the data. The launch date is unconfirmed. Keep the example within this clone.
 
 Review the proposed context files and approve that exact proposal only if it
-matches these facts. The agent should report the resulting receipt.
+matches these facts. Confirm that the proposal initializes `state/current.md`
+as well as the project context; a receipt alone does not establish start
+readiness. The agent should report the resulting receipt. Run
+`bash scripts/contextos.sh start` and check that its JSON reports
+`"initialized": true` before proceeding. The Markdown briefing is a source
+preview and does not display this readiness field.
 
 ## 2. Save one decision with Claude
 
@@ -36,6 +70,11 @@ Invoke `/end` and provide this handoff:
 Inspect the proposed decision row and session note. Approve the exact proposal
 after review. Save the receipt path the agent reports. Do not commit or push as
 part of this exercise; the second agent reads the same local files.
+
+If the diff invents a launch date or omits the reason for rejecting PDF, decline
+it. Ask the agent to generate a corrected proposal, inspect its new diff and
+digest, and approve only that proposal. An unapplied proposal remains stored
+for inspection but does not change durable context or create an apply receipt.
 
 For an independent view in a terminal:
 
@@ -84,3 +123,7 @@ For controlled comparisons with a plain handoff note, use the
 [continuity benchmark](continuity-benchmark.md). For your own project, continue
 with [getting started](getting-started.md); select additional agents and imports
 when needed. Other hosts retain their own documented command names.
+
+The [synthetic handoff observations](https://github.com/conorbronsdon/agent-context-os/blob/c4648d80fc72ed27abce527a05e952e42580783b/docs/evidence/synthetic-handoffs-2026-09-29/report.md)
+record kernel trials and fresh receiving-agent checks that informed this guide.
+They do not establish human onboarding time or native host behavior.
