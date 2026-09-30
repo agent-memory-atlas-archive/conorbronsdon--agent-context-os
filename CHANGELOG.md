@@ -5,6 +5,10 @@
 ## [1.0.0] — 2026-09-29 — Reviewed handoffs and stable interfaces
 
 ### Fixed
+- Release qualification fixtures follow the copied kernel's version. Diagnostic
+  uploads after failure cannot bypass staging or publication gates.
+- Social-preview labels include first-class Hermes Agent and Cursor CLI while
+  keeping Cursor IDE and Devin experimental.
 - Release-template runtime registration and scoped doctor checks no longer
   require omitted maintainer evidence files. Operational instruction, skill and
   onboarding paths, descriptor structure and component ownership remain checked.

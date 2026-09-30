@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Synthetic migration qualification using exact final release artifacts and real CLI.
 No native agent/human evidence. Keeps all fixtures, failed proposals, and receipts.
 """

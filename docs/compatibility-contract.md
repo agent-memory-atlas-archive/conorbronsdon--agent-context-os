@@ -98,6 +98,10 @@ also runs doctor after its receipt is durable: a warning or failure at that poin
 does not roll back the committed update. Inspect the report and resolve its
 specific configuration or onboarding problem before claiming readiness. Never install
 an older kernel over a pending newer journal as a rollback shortcut.
+If doctor raises after apply, the command can exit 2 without printing its already
+durable receipt. Check `.context-os/receipts/` and
+`.context-os/installed-bundle.json` before retrying; a nonzero exit alone does not
+establish rollback.
 
 Qualification must exercise actual published 0.14 and 0.15 bundles, customized
 seeds and extensible files, managed conflicts, missing installed state, failed
