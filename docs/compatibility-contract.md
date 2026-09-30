@@ -34,8 +34,8 @@ validators and writers are in `contextos/kernel.py`; proposal fields and
 digests must not be edited manually. Keep proposals, receipts and pending
 journals together when preserving recovery evidence. Regenerate an unapplied
 proposal after an upgrade rather than assuming a proposal from an older kernel
-can still apply. Plans and proposals are local to their verified inputs and mode
-observability; moving a proposal between operating systems is not a supported
+can still apply. Plans and proposals bind the input snapshots and executable-mode
+checks available on the system that created them. Moving a proposal between operating systems is not a supported
 reuse path. Receipt history remains evidence of past changes, not approval
 to repeat them.
 
@@ -106,6 +106,6 @@ these release trials. Final 1.0 qualification also requires current host
 evidence, independent exact-source reviews, full validation and the
 [release asset gates](release-process.md).
 
-The [published-bundle preflight](evidence/upgrade-preflight-2026-09-29/report.md)
+The [published-bundle preflight](https://github.com/conorbronsdon/agent-context-os/blob/c4648d80fc72ed27abce527a05e952e42580783b/docs/evidence/upgrade-preflight-2026-09-29/report.md)
 records early Windows upgrade and recovery controls. Its development snapshot
 is separate from the final release qualification.

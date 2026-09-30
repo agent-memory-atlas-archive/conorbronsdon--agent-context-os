@@ -67,8 +67,12 @@ require a later release.
 
 Initialize your own Git repository inside the verified extracted workspace
 before running setup (`git init`). This gives its hooks and Git evidence an
-independent boundary. Continue with the [first reviewed handoff](docs/first-handoff.md);
-that guide uses the same verified release and keeps the exercise local.
+independent boundary. The [first reviewed handoff](docs/first-handoff.md) covers
+release verification and a local synthetic exercise.
+
+The 0.15.0 template has a runtime-registration defect: it requires development
+evidence files that the archive excludes. Verification and extraction work, but
+use the source setup path below until a release containing the fix is published.
 
 ### Start from source
 
@@ -330,6 +334,8 @@ behavior of an installed agent version or an external service.
 |---|---|
 | Install and choose a host | [Getting started](docs/getting-started.md) |
 | Review the proposed 1.0 stability promise | [Compatibility contract](docs/compatibility-contract.md) |
+| Inspect synthetic handoff tests | [Synthetic observations](https://github.com/conorbronsdon/agent-context-os/blob/c4648d80fc72ed27abce527a05e952e42580783b/docs/evidence/synthetic-handoffs-2026-09-29/report.md) |
+| Inspect published-bundle upgrade trials | [Upgrade preflight](https://github.com/conorbronsdon/agent-context-os/blob/c4648d80fc72ed27abce527a05e952e42580783b/docs/evidence/upgrade-preflight-2026-09-29/report.md) |
 | Understand agent selection and legacy migration | [Workspace configuration](docs/workspace-configuration.md) |
 | Import useful context from another system | [Migration guide](docs/migration-guide.md) |
 | Use the repository in Codex | [Codex onboarding](docs/codex-onboarding.md) |

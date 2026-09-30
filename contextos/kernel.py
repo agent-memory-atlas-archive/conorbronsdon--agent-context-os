@@ -4552,7 +4552,8 @@ def runtime_ids(root: Path) -> list[str]:
 
 
 def runtime_manifest(
-    root: Path, runtime: str, *, check_paths: bool = True
+    root: Path, runtime: str, *, check_paths: bool = True,
+    check_evidence_paths: bool | None = None,
 ) -> dict[str, Any]:
     """Load a runtime and its required core component contract.
 
@@ -4568,7 +4569,8 @@ def runtime_manifest(
     manifest = read_json(manifest_path)
     try:
         validate_runtime_manifest(
-            manifest, runtime_id=runtime, root=root, check_paths=check_paths
+            manifest, runtime_id=runtime, root=root, check_paths=check_paths,
+            check_evidence_paths=check_evidence_paths,
         )
         component_path = safe_repo_path(root, "components/manifest.json")
         components = load_component_manifest(
@@ -5029,7 +5031,9 @@ def migrate_legacy_runtime_state(
 
 
 def install_runtime(root: Path, runtime: str) -> tuple[Path, dict[str, Any]]:
-    manifest = runtime_manifest(root, runtime)
+    # Release templates omit maintainer tests/evidence. Operational sources and
+    # component ownership still validate; registration does not rerun conformance.
+    manifest = runtime_manifest(root, runtime, check_evidence_paths=False)
     with host_state_lock(root):
         _, _, _, migrated_runtime = _migrate_legacy_runtime_state_unlocked(root)
         state = _read_hosts_state(root)
@@ -5547,6 +5551,7 @@ def doctor(
                     root=root,
                     today=effective_today,
                     check_paths=True,
+                    check_evidence_paths=scope == "maintainer-all",
                 )
                 add(f"runtime-paths:{runtime_id}", "pass", "referenced paths exist")
             except (RuntimeManifestError, OSError, UnicodeError) as exc:

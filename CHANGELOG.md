@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+- Release-template runtime registration and scoped doctor checks no longer
+  require omitted maintainer evidence files. Operational instruction, skill and
+  onboarding paths, descriptor structure and component ownership remain checked.
 - Setup normalizes Windows CRLF prompt input so a blank name stays skipped and
   populated names or remote URLs do not retain a carriage return.
 

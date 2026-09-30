@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
 
 from contextos.kernel import (
-    ContextOSError, install_runtime, runtime_hook_payload, runtime_ids,
+    ContextOSError, doctor, install_runtime, runtime_hook_payload, runtime_ids,
     runtime_manifest, runtime_registry,
 )
+from contextos.component_schema import load_component_manifest, resolved_component_paths
 from contextos.runtime_schema import (
     CAPABILITY_KEYS,
     RUNTIME_DESCRIPTOR_SCHEMA_VERSION,
@@ -28,6 +30,29 @@ def load(runtime: str) -> dict:
 
 
 class RuntimeManifestTest(unittest.TestCase):
+    def test_release_registration_omits_evidence_but_requires_operational_sources(self) -> None:
+        inventory = load_component_manifest(ROOT / "components/manifest.json", root=ROOT)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            component_ids = [item["id"] for item in inventory["components"]]
+            for record in resolved_component_paths(inventory, component_ids, include_development=False):
+                relative = record["path"]
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(ROOT / relative, target)
+            self.assertFalse((root / "tests").exists())
+            for runtime in ("claude", "codex", "cursor", "devin", "hermes", "openclaw", "opencode"):
+                with self.subTest(runtime=runtime):
+                    _, installed = install_runtime(root, runtime)
+                    self.assertEqual(runtime, installed["runtime"])
+                    checks = {item["name"]: item for item in doctor(root, runtime=runtime)["checks"]}
+                    self.assertEqual("pass", checks[f"runtime-paths:{runtime}"]["status"])
+            with self.assertRaisesRegex(ContextOSError, "path does not exist"):
+                runtime_manifest(root, "claude")
+            (root / "AGENTS.md").unlink()
+            with self.assertRaisesRegex(ContextOSError, "path does not exist"):
+                install_runtime(root, "codex")
+
     def test_registry_discovers_and_validates_every_descriptor(self) -> None:
         self.assertEqual(
             ["claude", "codex", "cursor", "devin", "hermes", "openclaw", "opencode"],
