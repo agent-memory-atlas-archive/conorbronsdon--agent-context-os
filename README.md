@@ -55,15 +55,20 @@ Personal and business context often belongs in a private repository. Create an e
 
 ### Start from a published release
 
-For a version-pinned workspace, open [v0.14.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.14.0)
+For a version-pinned workspace, open [v0.15.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.15.0)
 and download all five attached assets: the template `.tar`, bundle lock,
 provenance, `OFFLINE-VERIFY.md`, and `SHA256SUMS`. Follow that release's
-`agent-context-os-template-v0.14.0.OFFLINE-VERIFY.md` to verify the assets before
+`agent-context-os-template-v0.15.0.OFFLINE-VERIFY.md` to verify the assets before
 extracting and running setup. GitHub's generated source ZIP and tar.gz are
 repository snapshots; the attached template tar is the canonical workspace.
-Use the [v0.14.0 release notes](docs/releases/v0.14.0.md) for what that version
+Use the [v0.15.0 release notes](docs/releases/v0.15.0.md) for what that version
 ships. Changes and support promotions described on a development branch may
 require a later release.
+
+Initialize your own Git repository inside the verified extracted workspace
+before running setup (`git init`). This gives its hooks and Git evidence an
+independent boundary. Continue with the [first reviewed handoff](docs/first-handoff.md);
+that guide uses the same verified release and keeps the exercise local.
 
 ### Start from source
 
@@ -324,6 +329,7 @@ behavior of an installed agent version or an external service.
 | Goal | Guide |
 |---|---|
 | Install and choose a host | [Getting started](docs/getting-started.md) |
+| Review the proposed 1.0 stability promise | [Compatibility contract](docs/compatibility-contract.md) |
 | Understand agent selection and legacy migration | [Workspace configuration](docs/workspace-configuration.md) |
 | Import useful context from another system | [Migration guide](docs/migration-guide.md) |
 | Use the repository in Codex | [Codex onboarding](docs/codex-onboarding.md) |

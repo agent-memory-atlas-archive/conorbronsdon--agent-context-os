@@ -6,7 +6,7 @@ dates, append behavior, optimistic hashes, locking, and receipts.
 
 ## Shared lifecycle
 
-| Job | Claude Code | Codex | Hermes | OpenClaw | Cursor CLI / IDE (experimental) | Devin session (experimental) | Deterministic operation |
+| Job | Claude Code | Codex | Hermes | OpenClaw | Cursor CLI / Cursor IDE (experimental) | Devin session (experimental) | Deterministic operation |
 |---|---|---|---|---|---|---|---|
 | Initialize context | `/setup` | `$setup` | `/context-setup` | `/contextos <alias> setup` | `/context-setup` | `@skills:context-setup` | `contextos propose setup` then `apply` |
 | Start a session | `/start` | `$start` | `/context-start` | `/contextos <alias> start` | `/context-start` | `@skills:context-start` | read-only `contextos start` |
@@ -35,7 +35,7 @@ The mutation protocol is always:
 
 ## Runtime boundary
 
-| Capability | Claude Code | Codex | Hermes | OpenClaw | Cursor CLI / IDE (experimental) | Devin session (experimental) |
+| Capability | Claude Code | Codex | Hermes | OpenClaw | Cursor CLI / Cursor IDE (experimental) | Devin session (experimental) |
 |---|---|---|---|---|---|---|
 | Project instructions | `CLAUDE.md` | `AGENTS.md` | `AGENTS.md` | Alias-bound execution-directory `AGENTS.md` | Root `AGENTS.md` | Root `AGENTS.md` |
 | Portable skill source | Thin slash adapters | `.agents/skills/` | External directory or copied skills | Copied into private workspace `.agents/skills/` | `.agents/skills/` | `.agents/skills/` |

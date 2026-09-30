@@ -145,12 +145,14 @@ prompt_yn() {
     if ! IFS= read -r yn; then
       return 1
     fi
+    yn="${yn%$'\r'}"
     yn="${yn:-y}"
   else
     printf '%s [y/N] ' "$question" >&2
     if ! IFS= read -r yn; then
       return 1
     fi
+    yn="${yn%$'\r'}"
     yn="${yn:-n}"
   fi
   [[ "$yn" =~ ^[Yy] ]]
@@ -196,6 +198,7 @@ PY
   echo ""
   echo "  Registered runtimes: $REGISTERED_AGENTS"
   read -rp "  Repository agents (comma-separated, none for core-only, Enter for local auto-detection): " AGENT_SELECTION_RAW
+  AGENT_SELECTION_RAW="${AGENT_SELECTION_RAW%$'\r'}"
   if [ -n "$AGENT_SELECTION_RAW" ]; then
     AGENT_SELECTION_KIND="agents"
     validate_agent_selection "$AGENT_SELECTION_KIND" "$AGENT_SELECTION_RAW"
@@ -205,6 +208,8 @@ fi
 # ── 1. Your name ────────────────────────────────────────────────────────────
 
 read -rp "  Name to place in CLAUDE.md (or press Enter to skip): " USER_NAME
+# Windows piped answers may be CRLF; a blank answer must still mean skip.
+USER_NAME="${USER_NAME%$'\r'}"
 
 if [ -n "$USER_NAME" ]; then
   if grep -Fq '[Your Name]' CLAUDE.md; then
@@ -236,6 +241,7 @@ if echo "$CURRENT_REMOTE" | grep -q "agent-context-os"; then
   echo "  A replacement remote is optional; the privacy boundary above still applies."
   echo ""
   read -rp "  Your repo URL (or press Enter to skip): " NEW_REMOTE
+  NEW_REMOTE="${NEW_REMOTE%$'\r'}"
   if [ -n "$NEW_REMOTE" ]; then
     echo "  Proposed remote: $NEW_REMOTE"
     if prompt_yn "  Have you verified its visibility and intended audience?" "n"; then

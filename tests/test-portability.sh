@@ -756,7 +756,7 @@ fi
 
 multi_agent_fixture="$portability_tmp/multi-agent-selection"
 make_setup_fixture "$multi_agent_fixture"
-multi_agent_output=$(printf 'y\n\nn\nn\ny\ny\nn\n' | (
+multi_agent_output=$(printf 'y\r\n\r\nn\r\nn\r\ny\r\ny\r\nn\r\n' | (
   cd "$multi_agent_fixture" &&
   PATH="$hostile_bash_path:$setup_test_path" "$resolved_bash" scripts/setup.sh --agents codex,claude
 ) 2>&1)
@@ -788,6 +788,23 @@ unexpected_setup_paths=$(git -C "$multi_agent_fixture" status --short | \
   grep -Ev '^( D workspace\.yaml|\?\? contextos\.workspace\.json)$' || true)
 test -z "$unexpected_setup_paths" \
   || fail "multi-agent setup changed unselected adapter or unrelated paths: $unexpected_setup_paths"
+
+# The CRLF blank-name case above must still skip personalization; a populated
+# CRLF answer must keep the name while dropping only the line terminator.
+name_fixture="$portability_tmp/crlf-name-selection"
+make_setup_fixture "$name_fixture"
+printf 'y\r\nTest Name\r\nn\r\nn\r\nn\r\ny\r\nn\r\n' | (
+  cd "$name_fixture" &&
+  PATH="$setup_test_path" "$resolved_bash" scripts/setup.sh --agents none
+) >/dev/null 2>&1
+"$CONTEXTOS_PYTHON_CMD" - "$name_fixture/CLAUDE.md" <<'PY'
+from pathlib import Path
+import sys
+
+content = Path(sys.argv[1]).read_bytes()
+assert b'Test Name' in content and b'[Your Name]' not in content, content
+assert b'\r' not in content, content
+PY
 
 devin_fixture="$portability_tmp/devin-managed-account-selection"
 make_setup_fixture "$devin_fixture"

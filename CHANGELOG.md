@@ -2,6 +2,30 @@
 
 ## [Unreleased]
 
+### Fixed
+- Setup normalizes Windows CRLF prompt input so a blank name stays skipped and
+  populated names or remote URLs do not retain a carriage return.
+
+### Added
+- Published 0.14/0.15 bundle preflight notes record conflict refusal, reconcile,
+  exact rollback and process-exit journal recovery on Windows, with final
+  release qualification explicitly outstanding.
+- Redacted synthetic handoff observations cover newcomer, returning-session and
+  reject/revise scenarios with separate fresh receiving agents.
+- A proposed 1.0 compatibility contract names the supported lifecycle, workspace,
+  proposal/receipt, adapter and bundle interfaces, plus migration, deprecation
+  and recovery requirements (#228).
+
+### Changed
+- The README release onboarding path now points to published v0.15.0 assets.
+- The first-handoff guide starts from that verified release and initializes an
+  independent Git boundary before setup.
+- Lifecycle tables explicitly separate first-class Cursor CLI from experimental
+  Cursor IDE.
+- The first-handoff guide checks current-state initialization and explains
+  declining and regenerating an inaccurate proposal. The end skill explains
+  the required date line when supplying complete replacement current state.
+
 ## [0.15.0] — 2026-09-29 — Hermes and Cursor CLI lifecycle support
 
 ### Added

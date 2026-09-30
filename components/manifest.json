@@ -1019,6 +1019,18 @@
                 {
                     "path": "docs/evidence/cursor-ide-2026-09-29/lifecycle.json",
                     "policy": "development"
+                },
+                {
+                    "path": "docs/compatibility-contract.md",
+                    "policy": "managed"
+                },
+                {
+                    "path": "docs/evidence/synthetic-handoffs-2026-09-29/report.md",
+                    "policy": "development"
+                },
+                {
+                    "path": "docs/evidence/upgrade-preflight-2026-09-29/report.md",
+                    "policy": "development"
                 }
             ]
         },

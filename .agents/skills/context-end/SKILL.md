@@ -54,6 +54,10 @@ Create a reviewed JSON payload under `<ContextRoot>/.context-os/inputs/`. Write 
   `blockers_markdown`, or `weekly_priorities_markdown`, only when that state
   materially changed.
 
+For `current_markdown`, read the existing current-state file and preserve exactly
+one `**Last Updated:**` line in the complete replacement. The kernel advances
+its date; it rejects a missing or duplicate line instead of inventing one.
+
 Run exactly one matching form:
 
 ```text

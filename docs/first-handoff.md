@@ -9,11 +9,24 @@ needed. See [getting started](getting-started.md) if a prerequisite is missing.
 
 ## 1. Set up one shared workspace
 
+Start with the five attached assets from
+[v0.15.0](https://github.com/conorbronsdon/agent-context-os/releases/tag/v0.15.0).
+Follow its `OFFLINE-VERIFY.md` before extracting or running setup. Use a fresh
+directory for this exercise. The attached template tar is the workspace;
+GitHub's generated source archives are different artifacts.
+
+After verification and extraction, initialize an independent Git repository so
+the exercise cannot inherit an enclosing repository's hooks or Git evidence:
+
 ```bash
-git clone https://github.com/conorbronsdon/agent-context-os.git handoff-demo
-cd handoff-demo
+cd agent-context-os-template-v0.15.0
+git init
 bash scripts/setup.sh --agents claude,codex
 ```
+
+For testing unreleased source instead, clone the development repository into a
+new `handoff-demo` directory and run the same setup command there. Record which
+source and version you tested; source-branch support may differ from the release.
 
 Review the agent-selection diff before approving it. Decline optional commits,
 remote changes, and hooks for this exercise. Launch `claude` from this directory,
@@ -24,7 +37,11 @@ invoke `/setup`, and answer the interview with this fictional project:
 > the data. The launch date is unconfirmed. Keep the example within this clone.
 
 Review the proposed context files and approve that exact proposal only if it
-matches these facts. The agent should report the resulting receipt.
+matches these facts. Confirm that the proposal initializes `state/current.md`
+as well as the project context; a receipt alone does not establish start
+readiness. The agent should report the resulting receipt. Run
+`bash scripts/contextos.sh start --format markdown` and check that setup is
+reported as initialized before proceeding.
 
 ## 2. Save one decision with Claude
 
@@ -36,6 +53,11 @@ Invoke `/end` and provide this handoff:
 Inspect the proposed decision row and session note. Approve the exact proposal
 after review. Save the receipt path the agent reports. Do not commit or push as
 part of this exercise; the second agent reads the same local files.
+
+If the diff invents a launch date or omits the reason for rejecting PDF, decline
+it. Ask the agent to generate a corrected proposal, inspect its new diff and
+digest, and approve only that proposal. An unapplied proposal remains stored
+for inspection but does not change durable context or create an apply receipt.
 
 For an independent view in a terminal:
 
@@ -84,3 +106,7 @@ For controlled comparisons with a plain handoff note, use the
 [continuity benchmark](continuity-benchmark.md). For your own project, continue
 with [getting started](getting-started.md); select additional agents and imports
 when needed. Other hosts retain their own documented command names.
+
+The [synthetic handoff observations](evidence/synthetic-handoffs-2026-09-29/report.md)
+record kernel trials and fresh receiving-agent checks that informed this guide.
+They do not establish human onboarding time or native host behavior.
